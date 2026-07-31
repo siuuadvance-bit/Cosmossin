@@ -1,4 +1,4 @@
-name: Build Android APK
+kname: Build Android APK
 
 on:
   push:
@@ -27,6 +27,9 @@ jobs:
 
       - name: Install Dependencies
         run: npm install --legacy-peer-deps || true
+
+      - name: Build Web App
+        run: npm run build || true
 
       - name: Sync Capacitor
         run: npx cap sync android || true
