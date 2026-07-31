@@ -1,0 +1,45 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Baixar código
+      uses: actions/checkout@v4
+
+    - name: Configurar Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Instalar dependências e gerar build web
+      run: |
+        npm install
+        npm run build
+
+    - name: Sincronizar Capacitor
+      run: |
+        npx cap sync android
+
+    - name: Compilar APK
+      run: |
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleRelease
+
+    - name: Disponibilizar o APK para Download
+      uses: actions/upload-artifact@v4
+      with:
+        name: CosmosSim-Release-APK
+        path: android/app/build/outputs/apk/release/*.apk

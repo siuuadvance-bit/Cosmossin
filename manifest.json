@@ -1,0 +1,20 @@
+{
+  "name": "Cosmos Sim!",
+  "short_name": "Cosmos Sim!",
+  "start_url": "index.html",
+  "display": "fullscreen",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "768x768",
+      "type": "image/png"
+    },
+    {
+      "src": "image.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

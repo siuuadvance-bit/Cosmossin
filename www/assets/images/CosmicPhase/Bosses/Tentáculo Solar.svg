@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg
+	version="1.1"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	x="0%" y="0%"
+	width="100%" height="100%"
+	viewBox="0 0 24.0 24.0"
+	enable-background="new 0 0 24.0 24.0"
+	xml:space="preserve">
+<defs>
+	<radialGradient id="fillGrad6" cx="50.000%" cy="50.000%" fx="50.000%" fy="50.000%" r="50.000%">
+   		<stop offset="0.000%" style="stop-color:rgb(255,253,75);stop-opacity:1.000" />
+		<stop offset="50.000%" style="stop-color:rgb(255,174,0);stop-opacity:1.000" />
+		<stop offset="100.000%" style="stop-color:rgb(255,114,0);stop-opacity:1.000" />
+	</radialGradient>
+
+	<radialGradient id="fillGrad7" cx="-77.926%" cy="76.186%" fx="-77.926%" fy="76.186%" r="256.697%">
+   		<stop offset="0.000%" style="stop-color:rgb(255,208,74);stop-opacity:1.000" />
+		<stop offset="45.851%" style="stop-color:rgb(255,229,102);stop-opacity:1.000" />
+		<stop offset="100.000%" style="stop-color:rgb(255,184,85);stop-opacity:1.000" />
+	</radialGradient>
+
+</defs>
+	<path
+		transform = "rotate(-0.00 12.41 12.08)"
+		fill="url(#fillGrad6)"
+		stroke="#000000"
+		fill-opacity="1.0"
+		stroke-opacity="1.000"
+		fill-rule="nonzero"
+		stroke-width="0.24"
+		stroke-linejoin="miter"
+		stroke-linecap="square"
+		d="M11.69,4.08Q17.45,10.05,14.84,19.94C12.58,22.36,9.75,21.53,9.17,18.27Q12.70,12.77,10.66,5.60Q8.19,0.97,11.69,4.08z"/>
+	<path
+		transform = "rotate(-0.00 11.90 18.33)"
+		fill="url(#fillGrad7)"
+		stroke="#000000"
+		fill-opacity="1.0"
+		stroke-opacity="1.000"
+		fill-rule="nonzero"
+		stroke-width="0.24"
+		stroke-linejoin="miter"
+		stroke-linecap="square"
+		d="M11.90,16.70C12.80,16.70,13.53,17.43,13.53,18.33C13.53,19.23,12.80,19.96,11.90,19.96C11.00,19.96,10.27,19.23,10.27,18.33C10.27,17.43,11.00,16.70,11.90,16.70zM12.46,12.84C11.66,12.84,11.01,13.49,11.01,14.29C11.01,15.09,11.66,15.74,12.46,15.74C13.26,15.74,13.91,15.09,13.91,14.29C13.91,13.49,13.26,12.84,12.46,12.84zM12.69,9.16C12.01,9.16,11.45,9.72,11.45,10.40C11.45,11.09,12.01,11.64,12.69,11.64C13.38,11.64,13.93,11.09,13.93,10.40C13.93,9.72,13.38,9.16,12.69,9.16zM12.03,6.28C11.53,6.28,11.13,6.70,11.13,7.21C11.13,7.72,11.53,8.14,12.03,8.14C12.53,8.14,12.93,7.72,12.93,7.21C12.93,6.70,12.53,6.28,12.03,6.28z"/>
+</svg>

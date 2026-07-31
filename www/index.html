@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>COSMOS SIM!</title>
+<link rel="manifest" href="manifest.json">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+<!-- SPLASH SCREEN — tela preta com fade-in/fade-out da logo, ao abrir o jogo -->
+<div id="boot-splash">
+  <img id="boot-splash-logo" src="images/logos/logo1.png" alt="">
+</div>
+
+<!-- TELA DE CARREGAMENTO (transição entre modos) -->
+<div class="screen hidden" id="loading-screen" style="z-index:200;">
+  <div class="cepheid-loader">
+    <div class="cepheid-loader-glow"></div>
+    <div class="cepheid-loader-ring"></div>
+    <div class="cepheid-loader-ring cepheid-loader-ring2"></div>
+    <div class="cepheid-loader-core"></div>
+  </div>
+  <div id="loading-screen-label">Carregando…</div>
+</div>
+
+<!-- MAIN MENU -->
+<div class="screen" id="main-screen">
+  <!-- Partículas decorativas de fundo -->
+  <canvas id="menu-stars" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></canvas>
+
+  <div id="menu-content">
+    <!-- Título como imagem PNG -->
+    <div id="menu-title-wrap">
+      <img src="images/title.png" alt="COSMOS SIM!" id="menu-title-img">
+      <div id="menu-title-fallback" style="display:none"></div>
+    </div>
+
+    <!-- Cards principais -->
+    <div id="menu-cards">
+
+      <!-- Criar Universo -->
+      <div class="menu-card card-create" id="btn-start">
+        <div class="mc-art">
+          <canvas class="mc-canvas" id="mc-canvas-create" width="80" height="66"></canvas>
+        </div>
+        <div class="mc-text">
+          <div class="mc-label">Criar Universo</div>
+          <div class="mc-sub">Novo universo do zero</div>
+        </div>
+      </div>
+
+      <!-- Importar Universo -->
+      <div class="menu-card card-import" id="btn-goto-load">
+        <div class="mc-art">
+          <canvas class="mc-canvas" id="mc-canvas-import" width="80" height="66"></canvas>
+        </div>
+        <div class="mc-text">
+          <div class="mc-label">Importar Universo</div>
+          <div class="mc-sub">Carregar save .cosmos</div>
+        </div>
+      </div>
+
+      <!-- Configurações -->
+      <div class="menu-card card-settings" id="btn-settings">
+        <div class="mc-art">
+          <canvas class="mc-canvas" id="mc-canvas-settings" width="80" height="66"></canvas>
+        </div>
+        <div class="mc-text">
+          <div class="mc-label">Configurações</div>
+          <div class="mc-sub">Áudio, gráficos e mais</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Botão sair — discreto, quase escondido -->
+    <button id="btn-achievements">🏆 Conquistas</button>
+    <button id="btn-quit">✕ sair do jogo</button>
+  </div>
+</div>
+
+<!-- CONFIGURAÇÕES PANEL (sobrepõe a main-screen) -->
+<div class="screen hidden" id="settings-screen">
+  <div id="settings-box">
+    <div id="settings-title">⚙ Configurações</div>
+
+    <div class="cfg-section">🔊 Áudio</div>
+
+    <div class="cfg-row">
+      <label class="cfg-lbl">Volume Ambiente</label>
+      <input type="range" class="cfg-slider" id="cfg-vol-ambient" min="0" max="100" value="100">
+      <span class="cfg-val" id="cfg-vol-ambient-val">100%</span>
+    </div>
+    <div class="cfg-row">
+      <label class="cfg-lbl">Volume Astros</label>
+      <input type="range" class="cfg-slider" id="cfg-vol-astros" min="0" max="100" value="100">
+      <span class="cfg-val" id="cfg-vol-astros-val">100%</span>
+    </div>
+
+    <div class="cfg-section" style="margin-top:14px">🎨 Gráficos</div>
+
+    <div class="cfg-row">
+      <label class="cfg-lbl">Partículas</label>
+      <input type="range" class="cfg-slider" id="cfg-particles" min="10" max="100" value="100">
+      <span class="cfg-val" id="cfg-particles-val">100%</span>
+    </div>
+    <div class="cfg-row cfg-toggle-row">
+      <label class="cfg-lbl">Malha Grav.</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-grav-grid">
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+    <div class="cfg-row cfg-toggle-row">
+      <label class="cfg-lbl">FPS Counter</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-fps" checked>
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+    <div class="cfg-row cfg-toggle-row">
+      <label class="cfg-lbl">Coords Camera</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-coords" checked>
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+
+    <div class="cfg-section" style="margin-top:14px">🌌 Simulação</div>
+
+    <div class="cfg-row">
+      <label class="cfg-lbl">Velocidade</label>
+      <input type="range" class="cfg-slider" id="cfg-sim-speed" min="10" max="300" value="100">
+      <span class="cfg-val" id="cfg-sim-speed-val">1×</span>
+    </div>
+    <div class="cfg-row cfg-toggle-row">
+      <label class="cfg-lbl">Modo Escuro+</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-dark-plus">
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+
+    <button id="cfg-reset-btn">↺ Redefinir padrões</button>
+
+    <div class="cfg-section" style="margin-top:14px">🖥️ Desktop / TV</div>
+    <div class="cfg-row cfg-toggle-row" id="cfg-tb-scroll-row">
+      <label class="cfg-lbl">Setas Barra Astros</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-tb-scroll" checked>
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+
+    <!-- EVC: visível só após Rank 5 Sandbox -->
+    <div id="evc-cfg-sec" class="cfg-section" style="margin-top:14px;display:none">✨ Evolução Visual Cósmica</div>
+    <div id="evc-cfg-row" class="cfg-row cfg-toggle-row" style="display:none">
+      <label class="cfg-lbl" style="color:#7be8ff">Visual 4K+</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-evc">
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+
+    <!-- Extensões/Pacotes — visível só após Rank 7 -->
+    <div id="packs-cfg-sec" class="cfg-section" style="margin-top:14px;display:none">📦 Extensões e Pacotes</div>
+    <div id="packs-cfg-row" class="cfg-row cfg-toggle-row" style="display:none">
+      <label class="cfg-lbl" style="color:#7be8ff">🪐 Pacote Planetas</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-planet-pack" checked>
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+    <div id="packs-star-cfg-row" class="cfg-row cfg-toggle-row" style="display:none">
+      <label class="cfg-lbl" style="color:#ffd43b">⭐ Pacote Estrelas</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-star-pack" checked>
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+    <div id="packs-exotic-cfg-row" class="cfg-row cfg-toggle-row" style="display:none">
+      <label class="cfg-lbl" style="color:#ff66ff">🌀 Pacote Exótico</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-exotic-pack" checked>
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+    <div id="packs-tech-cfg-row" class="cfg-row cfg-toggle-row" style="display:none">
+      <label class="cfg-lbl" style="color:#44ddff">⚙️ Pacote Tecnológico</label>
+      <label class="cfg-toggle">
+        <input type="checkbox" id="cfg-tech-pack" checked>
+        <span class="cfg-toggle-track"></span>
+      </label>
+    </div>
+
+    <div class="screen-back" id="settings-back">← voltar</div>
+  </div>
+</div>
+
+<!-- MODE SELECT -->
+<div class="screen hidden" id="mode-screen">
+  <div class="screen-sub" style="margin-top:0">selecione o modo</div>
+  <div class="mode-card normal" id="btn-mode-normal">
+    <h2>🌌 Modo Normal</h2>
+    <p>Crie e explore seu universo. Adicione astros, observe colisões, cometas, meteoros e eventos cósmicos.</p>
+  </div>
+  <div class="mode-card sbox" id="btn-mode-sandbox">
+    <h2>⚙️ Modo Sandbox</h2>
+    <p>Controle total. Edite qualquer astro, Bio-Config para TODOS, malha gravitacional, galáxias geradas dinamicamente e muito mais.</p>
+  </div>
+  <div class="mode-card explore" id="btn-mode-explore">
+    <h2>🚀 Exploração</h2>
+    <p id="explore-mode-desc">Viaje pelo universo em 3D simulado. Explore planetas, estrelas e astros raros. Descubra mundos, colete dados e registre o cosmos.</p>
+  </div>
+  <div class="screen-back" id="mode-back">← voltar</div>
+</div>
+
+<!-- SANDBOX PHASE SELECT — só aparece após a derrota do Quasord ── -->
+<div class="screen hidden" id="sandbox-phase-screen">
+  <div class="screen-sub" style="margin-top:0">selecione a era do universo</div>
+  <div class="mode-card normal" id="btn-phase-spatial">
+    <h2>🌠 Fase Espacial</h2>
+    <p>O universo como era antes do Grande Rasgo. Expansão contida, física estável, galáxias em escala conhecida. Seu save desta era é independente.</p>
+  </div>
+  <div class="mode-card sbox" id="btn-phase-cosmic">
+    <h2>🌌 Fase Cósmica</h2>
+    <p>O universo após o colapso da contenção Reptiliana. Expansão acelerada ao extremo, galáxias colossais, Buracos Negros vagantes e Quasi-Stars comuns. Save próprio e independente.</p>
+  </div>
+  <div class="screen-back" id="sandbox-phase-back">← voltar</div>
+</div>
+
+<!-- EXPLORATION MODE SCREEN -->
+<div class="screen hidden" id="explore-screen">
+  <canvas id="explore-canvas" style="position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;"></canvas>
+  <canvas id="exp-scan-canvas" style="position:absolute;inset:0;pointer-events:none;z-index:15;"></canvas>
+
+  <!-- HUD -->
+  <div id="exp-hud" style="position:absolute;top:0;left:0;right:0;padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:10;">
+    <div>
+      <div id="exp-sector" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7be8ff;text-shadow:0 0 10px #7be8ff;opacity:.85;">SETOR ALFA-001</div>
+      <div id="exp-coords" style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.08em;margin-top:2px;">x:0 y:0 z:0</div>
+    </div>
+    <div style="text-align:right;">
+      <div id="exp-obj-count" style="font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.1em;">0 astros</div>
+      <div id="exp-rank-badge" style="font-size:9px;color:#ffd43b;letter-spacing:.08em;margin-top:2px;"></div>
+    </div>
+  </div>
+
+  <!-- Log de descobertas -->
+  <div id="exp-log-panel" style="position:absolute;top:58px;right:0;width:148px;background:rgba(4,8,22,.92);border:1px solid rgba(123,232,255,.12);border-right:none;border-radius:12px 0 0 12px;padding:8px;z-index:25;transform:translateX(100%);transition:transform .35s cubic-bezier(.25,1,.3,1);">
+    <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(123,232,255,.55);margin-bottom:6px;">📋 Descobertas</div>
+    <div id="exp-log-list"></div>
+  </div>
+  <button id="exp-log-toggle" style="position:absolute;top:58px;right:0;width:22px;height:34px;background:rgba(4,8,22,.85);border:1px solid rgba(123,232,255,.2);border-right:none;border-radius:8px 0 0 8px;color:rgba(123,232,255,.6);font-size:10px;cursor:pointer;z-index:26;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;font-family:'Courier New',monospace;">◀</button>
+
+  <!-- Crosshair animado -->
+  <div id="exp-crosshair" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:8;opacity:.35;">
+    <svg width="40" height="40" viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="7" fill="none" stroke="#7be8ff" stroke-width="1" opacity=".5"/>
+      <line x1="20" y1="2" x2="20" y2="12" stroke="#7be8ff" stroke-width="1" opacity=".4"/>
+      <line x1="20" y1="28" x2="20" y2="38" stroke="#7be8ff" stroke-width="1" opacity=".4"/>
+      <line x1="2" y1="20" x2="12" y2="20" stroke="#7be8ff" stroke-width="1" opacity=".4"/>
+      <line x1="28" y1="20" x2="38" y2="20" stroke="#7be8ff" stroke-width="1" opacity=".4"/>
+      <g id="exp-ch-corners" style="transform-origin:20px 20px">
+        <line x1="14" y1="14" x2="17" y2="14" stroke="#7be8ff" stroke-width="1.2" opacity=".6"/>
+        <line x1="14" y1="14" x2="14" y2="17" stroke="#7be8ff" stroke-width="1.2" opacity=".6"/>
+        <line x1="26" y1="14" x2="23" y2="14" stroke="#7be8ff" stroke-width="1.2" opacity=".6"/>
+        <line x1="26" y1="14" x2="26" y2="17" stroke="#7be8ff" stroke-width="1.2" opacity=".6"/>
+        <line x1="14" y1="26" x2="17" y2="26" stroke="#7be8ff" stroke-width="1.2" opacity=".6"/>
+        <line x1="14" y1="26" x2="14" y2="23" stroke="#7be8ff" stroke-width="1.2" opacity=".6"/>
+        <line x1="26" y1="26" x2="23" y2="26" stroke="#7be8ff" stroke-width="1.2" opacity=".6"/>
+        <line x1="26" y1="26" x2="26" y2="23" stroke="#7be8ff" stroke-width="1.2" opacity=".6"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Toast scan -->
+  <div id="exp-scan-toast" style="position:absolute;top:80px;left:50%;transform:translateX(-50%) translateY(-18px);background:rgba(4,22,8,.95);border:1px solid rgba(80,255,120,.4);border-radius:14px;padding:8px 18px;z-index:40;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;white-space:nowrap;">
+    <span id="exp-scan-toast-icon" style="font-size:16px;margin-right:6px;vertical-align:middle;"></span>
+    <span id="exp-scan-toast-text" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#64ffb4;vertical-align:middle;"></span>
+  </div>
+
+  <!-- Info panel -->
+  <div id="exp-info" style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);width:290px;background:rgba(4,8,22,.97);border:1px solid rgba(123,232,255,.2);border-radius:18px;padding:16px 16px 14px;z-index:30;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div id="exp-info-icon" style="font-size:26px;flex-shrink:0;">🌍</div>
+      <div style="flex:1;min-width:0;">
+        <div id="exp-info-name" style="font-size:13px;letter-spacing:.14em;color:#7be8ff;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+        <div id="exp-info-type" style="font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-top:1px;"></div>
+      </div>
+      <button id="exp-info-close" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:18px;cursor:pointer;padding:2px;flex-shrink:0;">✕</button>
+    </div>
+    <div id="exp-info-rarity-badge" style="display:inline-block;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;padding:2px 8px;border-radius:8px;margin-bottom:9px;border:1px solid;"></div>
+    <div id="exp-info-rows" style="display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;"></div>
+    <div id="exp-info-desc" style="display:none;margin-top:8px;font-size:8.5px;color:rgba(255,255,255,.42);line-height:1.55;letter-spacing:.04em;padding:7px 8px;background:rgba(255,255,255,.03);border-radius:7px;border-left:2px solid rgba(123,232,255,.2);"></div>
+    <div id="exp-life-wrap" style="margin-top:10px;display:none;">
+      <div style="font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:3px;">Chance de Vida</div>
+      <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;">
+        <div id="exp-life-bar" style="height:100%;border-radius:3px;background:linear-gradient(90deg,#51cf66,#94d82d);width:0%;transition:width .5s;"></div>
+      </div>
+      <div id="exp-life-lbl" style="font-size:9px;color:#94d82d;margin-top:2px;letter-spacing:.06em;"></div>
+    </div>
+    <button id="exp-scan-btn" style="width:100%;margin-top:10px;padding:7px 0;background:rgba(100,255,180,.06);border:1px solid rgba(100,255,180,.25);border-radius:10px;color:#64ffb4;font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;-webkit-tap-highlight-color:transparent;">🔭 Iniciar Scanner</button>
+  </div>
+
+  <!-- Viagem -->
+  <div id="exp-travel-msg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:20;opacity:0;transition:opacity .4s;">
+    <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7be8ff;text-shadow:0 0 14px #7be8ff;margin-bottom:6px;">VIAJANDO PARA</div>
+    <div id="exp-travel-dest" style="font-size:15px;letter-spacing:.18em;color:#fff;font-family:'Courier New',monospace;"></div>
+    <div style="margin-top:12px;width:120px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin:12px auto 0;">
+      <div id="exp-travel-bar" style="height:100%;background:#7be8ff;width:0%;border-radius:2px;"></div>
+    </div>
+  </div>
+
+  <!-- Botão voltar -->
+  <button id="exp-back" style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:rgba(255,255,255,.38);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:8px 22px;cursor:pointer;font-family:'Courier New',monospace;z-index:30;-webkit-tap-highlight-color:transparent;">← Sair da Exploração</button>
+
+  <!-- Botão sair da galáxia -->
+  <button id="exp-gal-exit" style="position:absolute;bottom:54px;left:50%;transform:translateX(-50%);background:rgba(255,212,59,.08);border:1px solid rgba(255,212,59,.3);border-radius:12px;color:#ffd43b;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:8px 22px;cursor:pointer;font-family:'Courier New',monospace;z-index:30;-webkit-tap-highlight-color:transparent;opacity:0;transition:opacity .35s;pointer-events:none;">← Sair da Galáxia</button>
+
+  <!-- Hint -->
+  <div id="exp-hint" style="position:absolute;bottom:60px;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.1em;pointer-events:none;white-space:nowrap;">Arraste para rotacionar · Toque num astro ou galáxia para explorar</div>
+
+  <!-- ══ MAPA ESTELAR (minimap) ══ -->
+  <div id="exp-minimap" style="position:absolute;bottom:62px;right:6px;width:90px;height:90px;border-radius:50%;border:1px solid rgba(123,232,255,.22);background:rgba(2,5,18,.82);overflow:hidden;z-index:28;pointer-events:none;opacity:0;transition:opacity .3s;">
+    <canvas id="exp-minimap-canvas" width="90" height="90" style="display:block;"></canvas>
+    <div style="position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:5.5px;letter-spacing:.1em;color:rgba(123,232,255,.3);text-transform:uppercase;pointer-events:none;">MAPA ESTELAR</div>
+  </div>
+  <button id="exp-minimap-toggle" style="position:absolute;bottom:62px;right:6px;width:28px;height:28px;border-radius:50%;background:rgba(4,8,22,.85);border:1px solid rgba(123,232,255,.22);color:rgba(123,232,255,.5);font-size:11px;cursor:pointer;z-index:29;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:background .15s;font-family:sans-serif;">🗺</button>
+
+  <!-- ══ BANNER DE EVENTOS CÓSMICOS ══ -->
+  <div id="exp-event-banner" style="position:absolute;top:64px;left:50%;transform:translateX(-50%) translateY(-10px);background:rgba(4,8,22,.96);border:1px solid rgba(255,180,40,.4);border-radius:14px;padding:7px 16px;z-index:35;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;white-space:nowrap;">
+    <span id="exp-event-icon" style="font-size:15px;margin-right:6px;vertical-align:middle;"></span>
+    <span id="exp-event-text" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#ffd43b;vertical-align:middle;"></span>
+  </div>
+
+  <!-- ══ SINAL MISTERIOSO ══ -->
+  <div id="exp-signal-wrap" style="position:absolute;top:50%;right:12px;transform:translateY(-50%);pointer-events:none;z-index:28;opacity:0;transition:opacity .5s;text-align:center;">
+    <div style="font-size:18px;">📡</div>
+    <div id="exp-signal-dir" style="font-size:6.5px;color:#64ffb4;letter-spacing:.1em;text-transform:uppercase;margin-top:2px;">SINAL</div>
+    <div id="exp-signal-dist" style="font-size:6px;color:rgba(100,255,180,.5);letter-spacing:.08em;margin-top:1px;"></div>
+  </div>
+
+  <!-- ══ AVISO DE PROXIMIDADE (borda pulsante) ══ -->
+  <div id="exp-prox-warn" style="position:absolute;inset:0;pointer-events:none;z-index:6;opacity:0;transition:opacity .5s;"></div>
+  <div id="exp-prox-label" style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:27;opacity:0;transition:opacity .3s;text-align:center;">
+    <div id="exp-prox-icon" style="font-size:26px;"></div>
+    <div id="exp-prox-text" style="font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:#ff6060;text-shadow:0 0 12px rgba(255,60,60,.6);margin-top:4px;"></div>
+  </div>
+
+  <!-- ══ DIÁRIO DO EXPLORADOR ══ -->
+  <div id="exp-diary" style="position:absolute;bottom:62px;left:6px;background:rgba(4,8,22,.92);border:1px solid rgba(100,255,180,.2);border-radius:14px;padding:9px 11px 8px;z-index:28;min-width:116px;opacity:0;transition:opacity .3s;pointer-events:none;">
+    <div style="font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:#64ffb4;margin-bottom:6px;">📖 Explorador</div>
+    <div style="font-size:8.5px;color:rgba(255,255,255,.5);letter-spacing:.05em;margin-bottom:2px;">🔭 Escaneados: <span id="exp-diary-scanned">0</span></div>
+    <div style="font-size:8.5px;color:rgba(255,255,255,.5);letter-spacing:.05em;margin-bottom:2px;">🌌 Setores: <span id="exp-diary-sectors">0</span></div>
+    <div style="font-size:8.5px;color:rgba(255,255,255,.5);letter-spacing:.05em;margin-bottom:2px;">🌀 Galáxias: <span id="exp-diary-galaxies">0</span></div>
+    <div style="font-size:8.5px;color:rgba(255,255,255,.5);letter-spacing:.05em;">⭐ Lendários: <span id="exp-diary-rare">0</span></div>
+  </div>
+  <button id="exp-diary-toggle" style="position:absolute;bottom:62px;left:6px;width:28px;height:28px;border-radius:50%;background:rgba(4,8,22,.85);border:1px solid rgba(100,255,180,.22);color:rgba(100,255,180,.5);font-size:11px;cursor:pointer;z-index:29;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:background .15s;font-family:sans-serif;">📖</button>
+
+  <!-- ══ ANOMALIA INSTÁVEL — alerta de puxão gravitacional ══ -->
+  <div id="exp-anomaly-overlay" style="position:absolute;inset:0;pointer-events:none;z-index:50;opacity:0;transition:opacity .3s;"></div>
+  <div id="exp-anomaly-warn" style="position:absolute;top:96px;left:50%;transform:translateX(-50%);text-align:center;z-index:52;opacity:0;transition:opacity .3s;pointer-events:none;">
+    <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#ff5050;text-shadow:0 0 14px rgba(255,60,60,.8);">🌀 ANOMALIA INSTÁVEL — SENDO PUXADO</div>
+    <div id="exp-anomaly-timer" style="font-size:20px;letter-spacing:.1em;color:#fff;margin-top:3px;font-family:'Courier New',monospace;text-shadow:0 0 10px rgba(255,60,60,.6);">5.0s</div>
+  </div>
+  <div id="exp-thrust-controls" style="position:absolute;bottom:110px;left:50%;transform:translateX(-50%);display:flex;gap:14px;z-index:52;opacity:0;pointer-events:none;transition:opacity .3s;">
+    <button id="exp-thrust-left" style="width:64px;height:64px;border-radius:50%;background:rgba(255,60,60,.12);border:2px solid rgba(255,90,90,.5);color:#ff8080;font-size:22px;cursor:pointer;-webkit-tap-highlight-color:transparent;">◀</button>
+    <button id="exp-thrust-boost" style="width:74px;height:74px;border-radius:50%;background:rgba(255,150,40,.15);border:2px solid rgba(255,150,40,.55);color:#ffb060;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;">PROPULSOR</button>
+    <button id="exp-thrust-right" style="width:64px;height:64px;border-radius:50%;background:rgba(255,60,60,.12);border:2px solid rgba(255,90,90,.5);color:#ff8080;font-size:22px;cursor:pointer;-webkit-tap-highlight-color:transparent;">▶</button>
+  </div>
+  <div id="exp-anomaly-toast" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:60;opacity:0;pointer-events:none;transition:opacity .4s;">
+    <div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#ff5050;text-shadow:0 0 20px rgba(255,60,60,.9);">⚠ DANO ESTRUTURAL</div>
+    <div id="exp-anomaly-loss" style="font-size:10px;color:rgba(255,255,255,.6);letter-spacing:.08em;margin-top:4px;"></div>
+  </div>
+
+  <!-- ══ ASTRO EM COLAPSO — janela de decisão irreversível ══ -->
+  <div id="exp-collapse-banner" style="position:absolute;top:96px;left:50%;transform:translateX(-50%);text-align:center;z-index:52;opacity:0;pointer-events:none;transition:opacity .3s;">
+    <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#ff9f40;text-shadow:0 0 14px rgba(255,159,64,.7);">💫 ESTRELA VARIÁVEL EM COLAPSO</div>
+    <div id="exp-collapse-timer" style="font-size:20px;letter-spacing:.1em;color:#fff;margin-top:3px;font-family:'Courier New',monospace;text-shadow:0 0 10px rgba(255,159,64,.6);">28s</div>
+  </div>
+  <div id="exp-collapse-modal" style="display:none;position:absolute;inset:0;z-index:80;align-items:center;justify-content:center;background:rgba(2,5,18,.75);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .24s;">
+    <div style="background:rgba(4,9,28,.98);border:1px solid rgba(255,159,64,.3);border-radius:22px;padding:28px 24px 22px;width:min(88vw,280px);text-align:center;box-shadow:0 0 80px rgba(0,0,0,.8);">
+      <div style="font-size:28px;margin-bottom:10px;">💫</div>
+      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#ff9f40;margin-bottom:6px;">Estrela prestes a explodir</div>
+      <div id="exp-cmod-name" style="font-size:14px;letter-spacing:.16em;color:#fff;font-family:'Courier New',monospace;margin-bottom:8px;">—</div>
+      <div style="font-size:8.5px;color:rgba(255,255,255,.35);letter-spacing:.06em;margin-bottom:20px;line-height:1.5;">Escanear agora é arriscado — ela pode explodir antes do fim. Fugir é seguro, mas ela se perde para sempre, sem nova chance.</div>
+      <div style="display:flex;gap:10px;">
+        <button id="exp-cmod-scan" style="flex:1;padding:11px 0;background:rgba(255,159,64,.12);border:1px solid rgba(255,159,64,.42);border-radius:12px;color:#ff9f40;font-size:9px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;-webkit-tap-highlight-color:transparent;">🔭 Escanear (risco)</button>
+        <button id="exp-cmod-flee" style="flex:1;padding:11px 0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:rgba(255,255,255,.5);font-size:9px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;-webkit-tap-highlight-color:transparent;">✕ Fugir (seguro)</button>
+      </div>
+    </div>
+  </div>
+  <div id="exp-collapse-result" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:60;opacity:0;pointer-events:none;transition:opacity .4s;">
+    <div id="exp-collapse-result-title" style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;"></div>
+    <div id="exp-collapse-result-sub" style="font-size:9px;color:rgba(255,255,255,.55);letter-spacing:.08em;margin-top:4px;"></div>
+  </div>
+
+  <!-- ── Modal: confirmar viagem para novo setor ── -->
+  <div id="exp-travel-modal" style="display:none;position:absolute;inset:0;z-index:80;align-items:center;justify-content:center;background:rgba(2,5,18,.75);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .24s;">
+    <div style="background:rgba(4,9,28,.98);border:1px solid rgba(123,232,255,.25);border-radius:22px;padding:28px 24px 22px;width:min(88vw,272px);text-align:center;box-shadow:0 0 80px rgba(0,0,0,.8);">
+      <div style="font-size:28px;margin-bottom:10px;">🚀</div>
+      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7be8ff;margin-bottom:6px;">Viajar para outro setor?</div>
+      <div style="font-size:9px;color:rgba(255,255,255,.32);letter-spacing:.07em;margin-bottom:8px;">Destino:</div>
+      <div id="exp-tmod-dest" style="font-size:14px;letter-spacing:.18em;color:#fff;font-family:'Courier New',monospace;margin-bottom:8px;">—</div>
+      <div style="font-size:8px;color:rgba(255,255,255,.22);letter-spacing:.06em;margin-bottom:20px;">O setor atual será substituído por um novo universo gerado aleatoriamente.</div>
+      <div style="display:flex;gap:10px;">
+        <button id="exp-tmod-yes" style="flex:1;padding:11px 0;background:rgba(123,232,255,.1);border:1px solid rgba(123,232,255,.38);border-radius:12px;color:#7be8ff;font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;-webkit-tap-highlight-color:transparent;transition:background .15s;">🚀 Viajar</button>
+        <button id="exp-tmod-no"  style="flex:1;padding:11px 0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:rgba(255,255,255,.42);font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;-webkit-tap-highlight-color:transparent;transition:background .15s;">✕ Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: confirmar voo para galáxia ── -->
+  <div id="exp-gal-modal" style="display:none;position:absolute;inset:0;z-index:80;align-items:center;justify-content:center;background:rgba(2,5,18,.75);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .24s;">
+    <div style="background:rgba(4,9,28,.98);border:1px solid rgba(255,212,59,.25);border-radius:22px;padding:28px 24px 22px;width:min(88vw,272px);text-align:center;box-shadow:0 0 80px rgba(0,0,0,.8);">
+      <div style="font-size:28px;margin-bottom:10px;">🌌</div>
+      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#ffd43b;margin-bottom:6px;">Voar até esta galáxia?</div>
+      <div id="exp-gmod-name" style="font-size:15px;letter-spacing:.18em;color:#fff;font-family:'Courier New',monospace;margin-bottom:4px;">—</div>
+      <div id="exp-gmod-dist" style="font-size:8.5px;color:rgba(255,212,59,.55);letter-spacing:.09em;margin-bottom:20px;">—</div>
+      <div style="display:flex;gap:10px;">
+        <button id="exp-gmod-yes" style="flex:1;padding:11px 0;background:rgba(255,212,59,.1);border:1px solid rgba(255,212,59,.42);border-radius:12px;color:#ffd43b;font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;-webkit-tap-highlight-color:transparent;transition:background .15s;">🌌 Ir até lá</button>
+        <button id="exp-gmod-no"  style="flex:1;padding:11px 0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:rgba(255,255,255,.42);font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;-webkit-tap-highlight-color:transparent;transition:background .15s;">✕ Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- IMPORT SCREEN -->
+<div class="screen hidden" id="load-screen">
+  <div class="screen-sub" style="margin-top:0">importar universo</div>
+  <div class="import-zone" id="import-cards">
+    <label class="menu-card card-import-json" id="btn-import-json">
+      <div class="mc-art">
+        <canvas class="mc-canvas" id="mc-canvas-import-json" width="80" height="66"></canvas>
+      </div>
+      <div class="mc-text">
+        <div class="mc-label">Carregar Save</div>
+        <div class="mc-sub">Arquivo .cosmos</div>
+      </div>
+      <input type="file" id="import-file" accept=".cosmos" style="display:none">
+    </label>
+    <div class="menu-card card-local-saves" id="btn-local-saves">
+      <div class="mc-art">
+        <canvas class="mc-canvas" id="mc-canvas-local-saves" width="80" height="66"></canvas>
+      </div>
+      <div class="mc-text">
+        <div class="mc-label">Salvamentos</div>
+        <div class="mc-sub">Locais no dispositivo</div>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:8px;color:rgba(255,255,255,.3);letter-spacing:.1em;margin-top:16px;text-align:center">Arquivos .cosmos exportados pelo COSMOS SIM!</p>
+  <div class="screen-back" id="load-back">← voltar</div>
+</div>
+
+<!-- TELA DE SALVAMENTOS LOCAIS -->
+<div id="saves-screen" class="hidden">
+  <div class="sv-title">✦ Salvamentos Locais</div>
+  <div class="sv-sub" id="saves-sub">seus universos guardados no dispositivo</div>
+  <div id="saves-grid"></div>
+  <div id="saves-back">← voltar</div>
+  <!-- Overlay de renomear -->
+  <div id="sv-rename-overlay">
+    <div style="font-size:9px;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;margin-bottom:4px">Renomear Universo</div>
+    <input id="sv-rename-input" type="text" maxlength="24" placeholder="Nome do universo…">
+    <div class="sv-rename-btns">
+      <button class="sv-rename-ok" id="sv-rename-confirm">✓ Salvar</button>
+      <button class="sv-rename-cancel" id="sv-rename-cancel">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME UI -->
+<div id="cosmic-edge-indicators"></div>
+<div id="hud">
+  <div id="selected-label">✦ ESTRELA</div>
+  <div id="counters">
+    <span id="obj-count">0 obj</span>
+    <button id="btn-missions">📜 Missões<span id="missions-notif"></span></button>
+    <span id="fps-counter">-- fps</span>
+    <span id="cam-coords">0,0</span>
+    <div id="backpack-row">
+      <button id="btn-backpack" title="Mochila">🎒<span id="backpack-notif"></span></button>
+    </div>
+    <button id="btn-exit-game" title="Sair para o menu">⏏</button>
+  </div>
+</div>
+
+<!-- EXIT CONFIRM MODAL -->
+<div id="exit-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(2,4,16,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:rgba(6,10,28,.98);border:1px solid rgba(123,232,255,.18);border-radius:22px;padding:28px 26px 22px;width:min(88vw,320px);text-align:center;box-shadow:0 0 60px rgba(0,0,0,.7);">
+    <div style="font-size:28px;margin-bottom:10px;">🚀</div>
+    <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#7be8ff;margin-bottom:6px;">Sair do Jogo?</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.38);letter-spacing:.07em;margin-bottom:22px;">Progresso não salvo será perdido.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="exit-confirm-yes" style="flex:1;padding:10px 0;background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.3);border-radius:12px;color:#ff8080;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;">Sim, Sair</button>
+      <button id="exit-confirm-no"  style="flex:1;padding:10px 0;background:rgba(123,232,255,.07);border:1px solid rgba(123,232,255,.2);border-radius:12px;color:#7be8ff;font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;">Cancelar</button>
+    </div>
+  </div>
+</div>
+<div id="mode-badge">COLOCAR</div>
+<canvas id="grav-canvas"></canvas>
+<canvas id="canvas"></canvas>
+
+<!-- ── INVASÃO ALIEN — HUD ── -->
+<div id="alien-invasion-bar">
+  <div id="alien-hp-fill" style="width:100%"></div>
+  <div id="alien-hp-label">👽 INVASÃO ALIEN — 100%</div>
+  <div id="alien-reset-counter" style="display:none">🗑️ Reset: <span id="alien-reset-uses">3</span>/3</div>
+  <div id="alien-move-counter" style="display:none">✋ Mover: <span id="alien-move-uses">3</span>/3</div>
+  <div id="alien-delete-counter" style="display:none">💥 Del.Tudo: <span id="alien-delete-uses">2</span>/2</div>
+  <div id="alien-astro-counters" style="display:none">
+    <span id="alien-planet-counter">🌍 <span id="alien-planet-uses">5</span>/5</span>
+    <span id="alien-star-counter">⭐ <span id="alien-star-uses">4</span>/<span id="alien-star-max">4</span></span>
+    <span id="alien-moon-counter">🌙 <span id="alien-moon-uses">3</span>/3</span>
+    <span id="alien-cepheid-counter">✨ <span id="alien-cepheid-uses">2</span>/2</span>
+    <span id="alien-comet-counter">☄️ <span id="alien-comet-uses">3</span>/3</span>
+    <span id="alien-meteor-counter">🌠 <span id="alien-meteor-uses">3</span>/3</span>
+    <span id="alien-blackhole-counter">⚫ <span id="alien-blackhole-uses">1</span>/1</span>
+    <span id="alien-whitehole-counter">⚪ <span id="alien-whitehole-uses">1</span>/1</span>
+    <span id="alien-magnetar-counter">🧲 <span id="alien-magnetar-uses">1</span>/1</span>
+    <span id="alien-pulsar-counter">📡 <span id="alien-pulsar-uses">1</span>/1</span>
+    <span id="alien-quasar-counter">🌟 <span id="alien-quasar-uses">1</span>/1</span>
+    <span id="alien-blazar-counter">🔆 <span id="alien-blazar-uses">1</span>/1</span>
+  </div>
+</div>
+<canvas id="alien-rift-canvas"></canvas>
+<div id="alien-emergency-flash"></div>
+
+<!-- ── INVASÃO MARCIANA — HUD ── -->
+<div id="marsian-invasion-bar">
+  <div id="marsian-hp-fill" style="width:100%"></div>
+  <div id="marsian-hp-label">⚙️ INVASÃO MARCIANA — 100%</div>
+  <div id="marsian-reset-counter">🗑️ Reset: <span id="marsian-reset-uses">2</span>/2</div>
+  <div id="marsian-move-counter">✋ Mover: <span id="marsian-move-uses">3</span>/3</div>
+  <div id="marsian-astro-counters" style="display:none">
+    <span id="marsian-gasgiant-counter">🟠 <span id="marsian-gasgiant-uses">3</span>/3</span>
+    <span id="marsian-lavaplt-counter">🌋 <span id="marsian-lavaplt-uses">2</span>/2</span>
+    <span id="marsian-ironplt-counter">🔨 <span id="marsian-ironplt-uses">2</span>/2</span>
+    <span id="marsian-desertplt-counter">🏜️ <span id="marsian-desertplt-uses">2</span>/2</span>
+    <span id="marsian-superearth-counter">🌍 <span id="marsian-superearth-uses">1</span>/1</span>
+    <span id="marsian-icegiant-counter">🔵 <span id="marsian-icegiant-uses">1</span>/1</span>
+    <span id="marsian-minineptune-counter">💙 <span id="marsian-minineptune-uses">1</span>/1</span>
+    <span id="marsian-carbonplt-counter">🟫 <span id="marsian-carbonplt-uses">1</span>/1</span>
+    <span id="marsian-dwarfplanet-counter">⚪ <span id="marsian-dwarfplanet-uses">1</span>/1</span>
+    <span id="marsian-oceanplt-counter">🌊 <span id="marsian-oceanplt-uses">1</span>/1</span>
+  </div>
+</div>
+<canvas id="marsian-rift-canvas"></canvas>
+<div id="marsian-emergency-flash"></div>
+
+<div id="reptilian-invasion-bar">
+  <div id="reptilian-hp-fill" style="width:100%"></div>
+  <div id="reptilian-hp-label">🦎 INVASÃO REPTILIANA — 100%</div>
+  <div id="reptilian-astro-counters" style="display:none">
+    <span id="reptilian-quasiStar-counter">🌒 <span id="reptilian-quasiStar-uses">2</span>/2</span>
+    <span id="reptilian-wolfRayet-counter">🌪️ <span id="reptilian-wolfRayet-uses">2</span>/2</span>
+    <span id="reptilian-hypergiant-counter">🌞 <span id="reptilian-hypergiant-uses">2</span>/2</span>
+    <span id="reptilian-gravastar-counter">🫧 <span id="reptilian-gravastar-uses">3</span>/3</span>
+    <span id="reptilian-ironStar-counter">🎨 <span id="reptilian-ironStar-uses">2</span>/2</span>
+    <span id="reptilian-whiteDwarf-counter">🤍 <span id="reptilian-whiteDwarf-uses">2</span>/2</span>
+    <span id="reptilian-strangeStar-counter">🪞 <span id="reptilian-strangeStar-uses">1</span>/1</span>
+    <span id="reptilian-vampireStar-counter">🩸 <span id="reptilian-vampireStar-uses">1</span>/1</span>
+    <span id="reptilian-janusStar-counter">🎭 <span id="reptilian-janusStar-uses">1</span>/1</span>
+    <span id="reptilian-electroweakStar-counter">🔌 <span id="reptilian-electroweakStar-uses">1</span>/1</span>
+  </div>
+</div>
+<canvas id="reptilian-rift-canvas"></canvas>
+<div id="reptilian-emergency-flash"></div>
+<div id="rff-death-flash"></div>
+
+<!-- ── BOSS Cósmico Plasmícea: Polvicullus Estelarus — barra de vida ── -->
+<div id="polv-boss-hp-bar">
+  <div id="polvicullus-astro-counters">
+    <span id="polvicullus-exBlitzar-counter">🚨 <span id="polvicullus-exBlitzar-uses">2</span>/2</span>
+    <span id="polvicullus-exMonsterStar-counter">👹 <span id="polvicullus-exMonsterStar-uses">1</span>/1</span>
+    <span id="polvicullus-exKugelblitz-counter">⚡ <span id="polvicullus-exKugelblitz-uses">2</span>/2</span>
+    <span id="polvicullus-exIronStar-counter">🔩 <span id="polvicullus-exIronStar-uses">2</span>/2</span>
+    <span id="polvicullus-exBrownSubdwarf-counter">🟤 <span id="polvicullus-exBrownSubdwarf-uses">3</span>/3</span>
+    <span id="polvicullus-exQBall-counter">🟦 <span id="polvicullus-exQBall-uses">2</span>/2</span>
+    <span id="polvicullus-exDarkStar-counter">🖤 <span id="polvicullus-exDarkStar-uses">1</span>/1</span>
+    <span id="polvicullus-exRedHole-counter">🕯️ <span id="polvicullus-exRedHole-uses">1</span>/1</span>
+    <span id="polvicullus-exNakedSingularity-counter">🌈 <span id="polvicullus-exNakedSingularity-uses">1</span>/1</span>
+    <span id="polvicullus-exSpacetimeCrystal-counter">💎 <span id="polvicullus-exSpacetimeCrystal-uses">1</span>/1</span>
+  </div>
+  <div id="polv-boss-hp-name">
+    <span>🐙 POLVICULLUS ESTELARUS</span>
+    <span id="polv-boss-hp-phase">FASE 1</span>
+  </div>
+  <div id="polv-boss-hp-track">
+    <div id="polv-boss-hp-fill" style="width:100%"></div>
+    <div id="polv-boss-hp-glitch"></div>
+  </div>
+  <div id="polv-boss-hp-subtitle">🌟 GUARDIÃO PLASMÍCEA DAS PROFUNDEZAS</div>
+  <div id="polvicullus-reset-counter">🗑️ Reset: <span id="polvicullus-reset-uses">2</span>/2</div>
+  <div id="polvicullus-move-counter">✋ Mover: <span id="polvicullus-move-uses">3</span>/3</div>
+</div>
+<canvas id="polvicullus-rift-canvas"></canvas>
+<div id="polvicullus-emergency-flash"></div>
+
+<div id="galaximy-astro-counters-bar">
+  <div id="galaximy-astro-counters">
+    <span id="galaximy-techShkadovThruster-counter">🚀 <span id="galaximy-techShkadovThruster-uses">1</span>/1</span>
+    <span id="galaximy-techDysonSwarm-counter">🐝 <span id="galaximy-techDysonSwarm-uses">2</span>/2</span>
+    <span id="galaximy-techNicollDyson-counter">🔦 <span id="galaximy-techNicollDyson-uses">1</span>/1</span>
+    <span id="galaximy-techAlcubierreDrive-counter">🌀 <span id="galaximy-techAlcubierreDrive-uses">2</span>/2</span>
+    <span id="galaximy-techDysonSphere-counter">🔮 <span id="galaximy-techDysonSphere-uses">1</span>/1</span>
+    <span id="galaximy-techAldersonDisk-counter">💿 <span id="galaximy-techAldersonDisk-uses">1</span>/1</span>
+    <span id="galaximy-techSpaceElevator-counter">🛗 <span id="galaximy-techSpaceElevator-uses">2</span>/2</span>
+    <span id="galaximy-techMatrioshkaBrain-counter">🧠 <span id="galaximy-techMatrioshkaBrain-uses">1</span>/1</span>
+    <span id="galaximy-techMassExtractor-counter">⛏️ <span id="galaximy-techMassExtractor-uses">2</span>/2</span>
+    <span id="galaximy-techGravityProjector-counter">🌐 <span id="galaximy-techGravityProjector-uses">1</span>/1</span>
+  </div>
+</div>
+<div id="galx-boss-hp-bar">
+  <div id="galx-boss-hp-name">
+    <span>🌌 GALAXIMY</span>
+    <span id="galx-boss-hp-phase">FASE 1</span>
+  </div>
+  <div id="galx-boss-hp-track">
+    <div id="galx-boss-hp-fill" style="width:100%"></div>
+  </div>
+  <div id="galx-boss-hp-subtitle">🤖 GUARDIÃO ROBÓTICA — DEVORADOR DE GALÁXIAS</div>
+  <div id="galaximy-reset-counter">🗑️ Reset: <span id="galaximy-reset-uses">2</span>/2</div>
+  <div id="galaximy-move-counter">✋ Mover: <span id="galaximy-move-uses">3</span>/3</div>
+</div>
+<canvas id="galaximy-rift-canvas"></canvas>
+<div id="galaximy-emergency-flash"></div>
+
+<!-- ── Caixa de texto de zombaria do Quasord (timeout global de 20+1min) ── -->
+<div id="rff-taunt-box">
+  <div id="rff-taunt-text"></div>
+</div>
+
+<!-- ── BOSS Reptiliano: Aniquilador de Galáxias ── -->
+<div id="rept-boss-hp-bar">
+  <div id="rept-boss-hp-name">
+    <span>🦎 ANIQUILADOR DE GALÁXIAS</span>
+    <span id="rept-boss-hp-phase">FASE 1</span>
+  </div>
+  <div id="rept-boss-hp-track">
+    <div id="rept-boss-hp-fill" style="width:100%"></div>
+    <div id="rept-boss-hp-glitch"></div>
+  </div>
+  <div id="rept-boss-hp-subtitle">☠️ EXTERMINADOR DE CIVILIZAÇÕES</div>
+</div>
+
+<!-- ── BOSS TecnoAlieNave — barra de vida ── -->
+<div id="boss-hp-bar">
+  <div id="boss-hp-name">
+    <span>⚡ TECNOALIENAVE</span>
+    <span id="boss-hp-phase">FASE 1</span>
+  </div>
+  <div id="boss-hp-track">
+    <div id="boss-hp-fill" style="width:100%"></div>
+    <div id="boss-hp-glitch"></div>
+  </div>
+</div>
+
+<!-- ── BOSS Marciano: Devorador de Reatores — barra de vida ── -->
+<div id="mars-boss-hp-bar">
+  <div id="mars-boss-hp-name">
+    <span>⚙️ DEVORADOR DE REATORES</span>
+    <span id="mars-boss-hp-phase">FASE 1</span>
+  </div>
+  <div id="mars-boss-hp-track">
+    <div id="mars-boss-hp-fill" style="width:100%"></div>
+    <div id="mars-boss-hp-glitch"></div>
+  </div>
+  <div id="mars-boss-hp-subtitle">🔧 UNIDADE DE DESTRUIÇÃO FINAL</div>
+</div>
+
+<!-- Missions panel (sandbox only) -->
+<div id="missions-panel">
+  <div id="missions-header">
+    <h2>📜 Missões</h2>
+    <button id="missions-close">✕</button>
+  </div>
+  <div id="rank-bar-wrap">
+    <div id="rank-title">
+      <span>RANK — <span id="rank-name-lbl">Recruta Cósmico</span></span>
+      <span>Nív. <span id="rank-lvl-lbl">1</span></span>
+    </div>
+    <div id="rank-bar"><div id="rank-bar-fill" style="width:0%"></div></div>
+    <div id="rank-logs-lbl"><span id="rank-logs-cur">0</span> / <span id="rank-logs-next">100</span> LOGS</div>
+  </div>
+  <div id="missions-list"></div>
+</div>
+
+<!-- Unlock toast -->
+<div id="unlock-toast">
+  <div class="ut-icon" id="ut-icon">🌌</div>
+  <div class="ut-title" id="ut-title">Novo Astro Desbloqueado!</div>
+  <div class="ut-desc" id="ut-desc">Disponível na barra de ferramentas</div>
+</div>
+
+<!-- info-panel, sp-panel, bio-panel: criados dinamicamente pelo JS ao abrir -->
+
+<!-- ZOOM BAR -->
+<div id="zoom-bar">
+  <button class="zoom-btn" id="zoom-out">−</button>
+  <input type="range" id="zoom-slider" min="20" max="300" value="100" step="5">
+  <span id="zoom-label">100%</span>
+  <button class="zoom-btn" id="zoom-in">+</button>
+  <button class="zoom-btn sb-only" id="btn-grav" title="Malha Gravitacional" style="font-size:11px">⊞</button>
+  <button class="zoom-btn" id="btn-microscope" title="Microscópio Quântico" style="font-size:12px">🔬</button>
+</div>
+
+<!-- ═══ MODO MICROSCÓPIO ═══ -->
+<div id="microscope-overlay">
+  <div id="microscope-hud">
+    <div id="microscope-title">🔬 MICROSCÓPIO QUÂNTICO</div>
+    <div id="microscope-quantiks"><img src="Images/CosmicPhase/Quantik.svg" alt="Quantik"> <span id="ms-quantiks-amount">0</span></div>
+    <div id="microscope-staris"><img src="Images/CosmicPhase/Staris.svg" alt="Staris"> <span id="ms-staris-amount">0</span></div>
+    <button id="microscope-close">✕</button>
+  </div>
+  <canvas id="microscope-canvas"></canvas>
+  <div id="microscope-zoombar">
+    <button class="zoom-btn" id="ms-zoom-out">−</button>
+    <input type="range" id="ms-zoom-slider" min="50" max="400" value="100" step="5">
+    <span id="ms-zoom-label">100%</span>
+    <button class="zoom-btn" id="ms-zoom-in">+</button>
+  </div>
+  <div id="microscope-info">Segure em uma molécula para coletá-la</div>
+</div>
+
+<!-- ═══ MICROSCÓPIO — VISÃO PROFUNDA (antigo "Telescópio"): mesma
+     ferramenta do Microscópio, aprofundando a visão em átomos/quarks/
+     préons/cordas. Overlay e mecânica internos mantidos como estavam,
+     só unificado sob o nome "Microscópio" (não é uma ferramenta
+     separada) ═══ -->
+<div id="telescope-overlay">
+  <div id="telescope-hud">
+    <div id="telescope-title">🔬 MICROSCÓPIO — VISÃO PROFUNDA</div>
+    <div id="telescope-breadcrumb"></div>
+    <div id="telescope-staris">⭐ <span id="tsc-staris-amount">0</span></div>
+    <button id="telescope-close">✕</button>
+  </div>
+  <canvas id="telescope-canvas"></canvas>
+  <div id="telescope-zoombar">
+    <button class="zoom-btn" id="tsc-zoom-out">−</button>
+    <input type="range" id="tsc-zoom-slider" min="50" max="400" value="100" step="5">
+    <span id="tsc-zoom-label">100%</span>
+    <button class="zoom-btn" id="tsc-zoom-in">+</button>
+  </div>
+  <div id="telescope-info">Arraste para mover a câmera · duplo toque num elemento para aprofundar · duplo toque no vazio para voltar · segure para coletar</div>
+</div>
+
+<!-- TOOLBAR -->
+<div id="toolbar">
+  <button class="tool-btn cam-btn"   data-type="pan"         ><span class="icon">🔭</span><span class="label">Câmera</span><span class="kbd-hint">Space</span></button>
+  <button class="tool-btn drag-btn"  data-type="move"        ><span class="icon">✋</span><span class="label">Mover</span><span class="kbd-hint">V</span></button>
+  <button class="tool-btn cosmic-phase-btn" data-type="cosmicProbe"    id="btn-cosmic-probe"    style="display:none"><span class="icon">🛰️</span><span class="label">Sonda</span></button>
+  <button class="tool-btn cosmic-phase-btn" data-type="cosmicTower"    id="btn-cosmic-tower"    style="display:none"><span class="icon">🗼</span><span class="label">Torre</span></button>
+  <button class="tool-btn cosmic-phase-btn" data-type="cosmicSentinel" id="btn-cosmic-sentinel" style="display:none"><span class="icon">🛡️</span><span class="label">Sentinela</span></button>
+  <button class="tool-btn cosmic-phase-btn" data-type="cosmicKnight"   id="btn-cosmic-knight"   style="display:none"><span class="icon">⚔️</span><span class="label">Cavaleiro</span></button>
+  <button class="tool-btn cosmic-phase-btn" data-type="cosmicMage"     id="btn-cosmic-mage"     style="display:none"><span class="icon">🔮</span><span class="label">Mago</span></button>
+  <button class="tool-btn active"    data-type="star"        ><span class="icon">☀️</span><span class="label">Estrela</span><span class="kbd-hint">1</span></button>
+  <button class="tool-btn"           data-type="planet"      ><span class="icon">🪐</span><span class="label">Planeta</span><span class="kbd-hint">2</span></button>
+  <button class="tool-btn"           data-type="moon"        ><span class="icon">🌙</span><span class="label">Lua</span><span class="kbd-hint">3</span></button>
+  <button class="tool-btn"           data-type="comet"       ><span class="icon">☄️</span><span class="label">Cometa</span><span class="kbd-hint">4</span></button>
+  <button class="tool-btn"           data-type="meteor"      ><span class="icon">🪨</span><span class="label">Meteoro</span><span class="kbd-hint">5</span></button>
+  <button class="tool-btn"           data-type="blackhole"   ><span class="icon">⚫</span><span class="label">B.Negro</span><span class="kbd-hint">6</span></button>
+  <button class="tool-btn"           data-type="pulsar"      ><span class="icon">💠</span><span class="label">Pulsar</span><span class="kbd-hint">7</span></button>
+  <button class="tool-btn"           data-type="whitehole"   ><span class="icon">⭕</span><span class="label">B.Branco</span><span class="kbd-hint">8</span></button>
+  <button class="tool-btn"           data-type="wormhole"    ><span class="icon">🌀</span><span class="label">Minhoca</span><span class="kbd-hint">9</span></button>
+  <button class="tool-btn"           data-type="quasar"      ><span class="icon">🌟</span><span class="label">Quasar</span><span class="kbd-hint">Q</span></button>
+  <button class="tool-btn"           data-type="magnetar"    ><span class="icon">🧲</span><span class="label">Magnetar</span><span class="kbd-hint">M</span></button>
+  <button class="tool-btn"           data-type="protostar"   ><span class="icon">🌫️</span><span class="label">Proto</span><span class="kbd-hint">P</span></button>
+  <button class="tool-btn"           data-type="cepheid"     ><span class="icon">💫</span><span class="label">Cefeida</span><span class="kbd-hint">C</span></button>
+  <button class="tool-btn"           data-type="blazar"      ><span class="icon">🔆</span><span class="label">Blazar</span><span class="kbd-hint">B</span></button>
+  <button class="tool-btn"           data-type="microquasar" ><span class="icon">⚛️</span><span class="label">μQuasar</span><span class="kbd-hint">U</span></button>
+  <button class="tool-btn" id="btn-galaxy" data-type="galaxy"><span class="icon">🌌</span><span class="label">Galáxia</span><span class="kbd-hint">G</span></button>
+  <!-- UNLOCK-GATED ASTROS -->
+  <button class="tool-btn locked-astro" data-type="frozencore"    id="btn-frozencore"    ><span class="icon" id="ico-frozencore">🔒</span><span class="label">N.Gélido</span><span class="lock-rank" id="lr-frozencore">Rank 7</span></button>
+  <button class="tool-btn locked-astro" data-type="darkmatter"    id="btn-darkmatter"    ><span class="icon" id="ico-darkmatter">🔒</span><span class="label">M.Escura</span><span class="lock-rank" id="lr-darkmatter">Rank 5</span></button>
+  <button class="tool-btn locked-astro" data-type="polarstar"     id="btn-polarstar"     ><span class="icon" id="ico-polarstar">🔒</span><span class="label">Pol.Estr.</span><span class="lock-rank" id="lr-polarstar">Rank 10</span></button>
+  <button class="tool-btn locked-astro" data-type="voidbelt"      id="btn-voidbelt"      ><span class="icon" id="ico-voidbelt">🔒</span><span class="label">C.Vazio</span><span class="lock-rank" id="lr-voidbelt">Rank 15</span></button>
+  <button class="tool-btn locked-astro" data-type="riftfissure"   id="btn-riftfissure"   ><span class="icon" id="ico-riftfissure">🔒</span><span class="label">F.Ret.</span><span class="lock-rank" id="lr-riftfissure">Rank 20</span></button>
+  <button class="tool-btn locked-astro" data-type="twinstar"      id="btn-twinstar"      ><span class="icon" id="ico-twinstar">🔒</span><span class="label">Gêmeas</span><span class="lock-rank" id="lr-twinstar">Rank 25</span></button>
+  <button class="tool-btn locked-astro" data-type="bosonstar"     id="btn-bosonstar"     ><span class="icon" id="ico-bosonstar">🔒</span><span class="label">Bósons</span><span class="lock-rank" id="lr-bosonstar">Rank 30</span></button>
+  <button class="tool-btn locked-astro" data-type="greatattractor" id="btn-greatattractor"><span class="icon" id="ico-greatattractor">🔒</span><span class="label">G.Atrator</span><span class="lock-rank" id="lr-greatattractor">Rank 35</span></button>
+  <button class="tool-btn locked-astro" data-type="vetocrinazar"  id="btn-vetocrinazar"  ><span class="icon" id="ico-vetocrinazar">🔒</span><span class="label">Vetocr.</span><span class="lock-rank" id="lr-vetocrinazar">Rank 40</span></button>
+  <!-- Botões desbloqueados por conquistas -->
+  <button class="tool-btn" data-type="triplestar"        id="btn-triplestar"        style="display:none"><span class="icon">🌠</span><span class="label">S.Triplo</span></button>
+  <button class="tool-btn" data-type="exoticplanet_free" id="btn-exoticplanet_free" style="display:none"><span class="icon">🪐</span><span class="label">P.Exótico</span></button>
+  <button class="tool-btn" data-type="neutronstar_free"  id="btn-neutronstar_free"  style="display:none"><span class="icon">⭐</span><span class="label">E.Nêutrons</span></button>
+  <!-- ── Pacote Planetas — aparecem livres na barra quando o pacote está ativo ── -->
+  <button class="tool-btn planet-pack-btn" data-type="gasgiant"    id="btn-pp-gasgiant"    style="display:none"><span class="icon">🟠</span><span class="label">G.Gasoso</span></button>
+  <button class="tool-btn planet-pack-btn" data-type="icegiant"    id="btn-pp-icegiant"    style="display:none"><span class="icon">🔵</span><span class="label">G.Gelo</span></button>
+  <button class="tool-btn planet-pack-btn" data-type="superearth"  id="btn-pp-superearth"  style="display:none"><span class="icon">🌍</span><span class="label">S.Terra</span></button>
+  <button class="tool-btn planet-pack-btn" data-type="minineptune" id="btn-pp-minineptune" style="display:none"><span class="icon">💙</span><span class="label">MiniNet.</span></button>
+  <button class="tool-btn planet-pack-btn" data-type="dwarfplanet"  id="btn-pp-dwarfplanet" style="display:none"><span class="icon">⚪</span><span class="label">P.Anão</span></button>
+  <button class="tool-btn planet-pack-btn" data-type="lavaplt"     id="btn-pp-lavaplt"     style="display:none"><span class="icon">🌋</span><span class="label">Lava</span></button>
+  <button class="tool-btn planet-pack-btn" data-type="oceanplt"    id="btn-pp-oceanplt"    style="display:none"><span class="icon">🌊</span><span class="label">Oceano</span></button>
+  <button class="tool-btn planet-pack-btn" data-type="desertplt"   id="btn-pp-desertplt"   style="display:none"><span class="icon">🏜️</span><span class="label">Deserto</span></button>
+  <button class="tool-btn planet-pack-btn" data-type="carbonplt"   id="btn-pp-carbonplt"   style="display:none"><span class="icon">🟫</span><span class="label">Carbono</span></button>
+  <button class="tool-btn planet-pack-btn" data-type="ironplt"     id="btn-pp-ironplt"     style="display:none"><span class="icon">🔨</span><span class="label">Ferro</span></button>
+  <!-- ── Pacote Estrelas — aparecem livres na barra quando o pacote está ativo ── -->
+  <button class="tool-btn star-pack-btn" data-type="redDwarf"      id="btn-sp-redDwarf"      style="display:none"><span class="icon">🔴</span><span class="label">A.Vermelha</span></button>
+  <button class="tool-btn star-pack-btn" data-type="yellowDwarf"   id="btn-sp-yellowDwarf"   style="display:none"><span class="icon">🌕</span><span class="label">A.Amarela</span></button>
+  <button class="tool-btn star-pack-btn" data-type="blueStar"      id="btn-sp-blueStar"      style="display:none"><span class="icon">🔷</span><span class="label">E.Azul</span></button>
+  <button class="tool-btn star-pack-btn" data-type="redGiant"      id="btn-sp-redGiant"      style="display:none"><span class="icon">🟥</span><span class="label">G.Vermelha</span></button>
+  <button class="tool-btn star-pack-btn" data-type="supergiant"    id="btn-sp-supergiant"    style="display:none"><span class="icon">💥</span><span class="label">Supergig.</span></button>
+  <button class="tool-btn star-pack-btn" data-type="whiteDwarf"    id="btn-sp-whiteDwarf"    style="display:none"><span class="icon">🤍</span><span class="label">A.Branca</span></button>
+  <button class="tool-btn star-pack-btn" data-type="hypergiant"    id="btn-sp-hypergiant"    style="display:none"><span class="icon">🌞</span><span class="label">Hipergig.</span></button>
+  <button class="tool-btn star-pack-btn" data-type="vampireStar"   id="btn-sp-vampireStar"   style="display:none"><span class="icon">🩸</span><span class="label">Vampira</span></button>
+  <button class="tool-btn star-pack-btn" data-type="quarkStar"     id="btn-sp-quarkStar"     style="display:none"><span class="icon">🔗</span><span class="label">Quarks</span></button>
+  <button class="tool-btn star-pack-btn" data-type="thorneZytkow"  id="btn-sp-thorneZytkow"  style="display:none"><span class="icon">🍥</span><span class="label">Thorne-Ż</span></button>
+  <button class="tool-btn star-pack-btn" data-type="ironStar"      id="btn-sp-ironStar"      style="display:none"><span class="icon">🎨</span><span class="label">E.Ferro</span></button>
+  <button class="tool-btn star-pack-btn" data-type="strangeStar"   id="btn-sp-strangeStar"   style="display:none"><span class="icon">🪞</span><span class="label">Estranha</span></button>
+  <button class="tool-btn star-pack-btn" data-type="electroweakStar" id="btn-sp-electroweakStar" style="display:none"><span class="icon">🔌</span><span class="label">Eletrofraca</span></button>
+  <button class="tool-btn star-pack-btn" data-type="planckStar"    id="btn-sp-planckStar"    style="display:none"><span class="icon">🧵</span><span class="label">Planck</span></button>
+  <button class="tool-btn star-pack-btn" data-type="wolfRayet"     id="btn-sp-wolfRayet"     style="display:none"><span class="icon">🌪️</span><span class="label">Wolf-Rayet</span></button>
+  <button class="tool-btn star-pack-btn" data-type="przybylski"    id="btn-sp-przybylski"    style="display:none"><span class="icon">✨</span><span class="label">Przybylski</span></button>
+  <button class="tool-btn star-pack-btn" data-type="janusStar"     id="btn-sp-janusStar"     style="display:none"><span class="icon">🎭</span><span class="label">Janus</span></button>
+  <button class="tool-btn star-pack-btn" data-type="cosmicString"  id="btn-sp-cosmicString"  style="display:none"><span class="icon">〰️</span><span class="label">Cordas</span></button>
+  <button class="tool-btn star-pack-btn" data-type="gravastar"     id="btn-sp-gravastar"     style="display:none"><span class="icon">🫧</span><span class="label">Gravastar</span></button>
+  <button class="tool-btn star-pack-btn" data-type="quasiStar"     id="btn-sp-quasiStar"     style="display:none"><span class="icon">🌒</span><span class="label">Quasi-Star</span></button>
+  <!-- ── Pacote Exótico — aparecem livres na barra quando o pacote está ativo (Rank 28) ── -->
+  <button class="tool-btn exotic-pack-btn" data-type="exDarkStar"          id="btn-ex-exDarkStar"          style="display:none"><span class="icon">🖤</span><span class="label">E.Escura</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exLittleRedDot"      id="btn-ex-exLittleRedDot"      style="display:none"><span class="icon">🔺</span><span class="label">P.Vermelho</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exMonsterStar"       id="btn-ex-exMonsterStar"       style="display:none"><span class="icon">👹</span><span class="label">E.Monstro</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exIronStar"          id="btn-ex-exIronStar"          style="display:none"><span class="icon">🔩</span><span class="label">E.Ferro Ex.</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exCosmicString"      id="btn-ex-exCosmicString"      style="display:none"><span class="icon">➰</span><span class="label">C.Cósmica</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exBlitzar"           id="btn-ex-exBlitzar"           style="display:none"><span class="icon">🚨</span><span class="label">Blitzar</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exBeStar"            id="btn-ex-exBeStar"            style="display:none"><span class="icon">🔦</span><span class="label">E.Be</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exBinaryNeutronStar" id="btn-ex-exBinaryNeutronStar" style="display:none"><span class="icon">🌗</span><span class="label">E.N.Binárias</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exHoagObject"        id="btn-ex-exHoagObject"        style="display:none"><span class="icon">💍</span><span class="label">Obj.Hoag</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exDarkGalaxy"        id="btn-ex-exDarkGalaxy"        style="display:none"><span class="icon">🥽</span><span class="label">G.Escura</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exRedHole"           id="btn-ex-exRedHole"           style="display:none"><span class="icon">🕯️</span><span class="label">B.Vermelho</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exNakedSingularity"  id="btn-ex-exNakedSingularity"  style="display:none"><span class="icon">🌈</span><span class="label">Singularidade</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exBlanet"            id="btn-ex-exBlanet"            style="display:none"><span class="icon">🌚</span><span class="label">Blaneta</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exBrownSubdwarf"     id="btn-ex-exBrownSubdwarf"     style="display:none"><span class="icon">🟤</span><span class="label">Sub-anã Marrom</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exQBall"             id="btn-ex-exQBall"             style="display:none"><span class="icon">🟦</span><span class="label">Q-Ball</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exGeon"              id="btn-ex-exGeon"              style="display:none"><span class="icon">♾️</span><span class="label">Geon</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exDomainWall"        id="btn-ex-exDomainWall"        style="display:none"><span class="icon">🧱</span><span class="label">M.Domínio</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exSpacetimeCrystal"  id="btn-ex-exSpacetimeCrystal"  style="display:none"><span class="icon">💎</span><span class="label">Cristal E-T</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exKugelblitz"        id="btn-ex-exKugelblitz"        style="display:none"><span class="icon">🎇</span><span class="label">Kugelblitz</span></button>
+  <button class="tool-btn exotic-pack-btn" data-type="exDarkEnergyStar"    id="btn-ex-exDarkEnergyStar"    style="display:none"><span class="icon">🟣</span><span class="label">E.Energia Escura</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techDysonSphere"      id="btn-tech-techDysonSphere"      style="display:none"><span class="icon">🌐</span><span class="label">Esfera Dyson</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techDysonSwarm"        id="btn-tech-techDysonSwarm"       style="display:none"><span class="icon">🛞</span><span class="label">Enxame Dyson</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techShkadovThruster"   id="btn-tech-techShkadovThruster"  style="display:none"><span class="icon">📡</span><span class="label">Motor Shkadov</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techMatrioshkaBrain"   id="btn-tech-techMatrioshkaBrain"  style="display:none"><span class="icon">🧠</span><span class="label">Matrioshka</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techSpaceElevator"     id="btn-tech-techSpaceElevator"    style="display:none"><span class="icon">🛗</span><span class="label">Elevador</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techAlcubierreDrive"   id="btn-tech-techAlcubierreDrive"  style="display:none"><span class="icon">🚀</span><span class="label">Alcubierre</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techMassExtractor"     id="btn-tech-techMassExtractor"    style="display:none"><span class="icon">⛏️</span><span class="label">Extrator</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techAldersonDisk"      id="btn-tech-techAldersonDisk"     style="display:none"><span class="icon">💿</span><span class="label">Disco Alderson</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techNicollDyson"       id="btn-tech-techNicollDyson"      style="display:none"><span class="icon">🔅</span><span class="label">Nicoll-Dyson</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techGravityProjector"  id="btn-tech-techGravityProjector" style="display:none"><span class="icon">🧿</span><span class="label">Proj.Gravidade</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityStarDevourer"    id="btn-tech-entityStarDevourer"   style="display:none"><span class="icon">🔥</span><span class="label">Devorador</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityInvasionFleet"   id="btn-tech-entityInvasionFleet"  style="display:none"><span class="icon">🛸</span><span class="label">Frota Militar</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityMarcianFleet"    id="btn-tech-entityMarcianFleet"   style="display:none"><span class="icon">🚁</span><span class="label">Frota Marciana</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityReptilianFleet"  id="btn-tech-entityReptilianFleet" style="display:none"><span class="icon">🔻</span><span class="label">Frota Reptiliana</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityCosmicParasite"  id="btn-tech-entityCosmicParasite" style="display:none"><span class="icon">🦠</span><span class="label">Parasita</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityVoidSerpent"     id="btn-tech-entityVoidSerpent"    style="display:none"><span class="icon">🐍</span><span class="label">Serpente</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityMechaWorld"      id="btn-tech-entityMechaWorld"     style="display:none"><span class="icon">⚙️</span><span class="label">Mecha-Mundo</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techProbe"             id="btn-tech-techProbe"            style="display:none"><span class="icon">🛰️</span><span class="label">Sonda</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techLaboratory"        id="btn-tech-techLaboratory"       style="display:none"><span class="icon">🔬</span><span class="label">Laboratório</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techStation"           id="btn-tech-techStation"          style="display:none"><span class="icon">🏗️</span><span class="label">Estação</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="techTelescope"         id="btn-tech-techTelescope"        style="display:none"><span class="icon">🔭</span><span class="label">Telescópio</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityAlien"           id="btn-tech-entityAlien"          style="display:none"><span class="icon">👽</span><span class="label">Alien</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityMarcian"         id="btn-tech-entityMarcian"        style="display:none"><span class="icon">🟢</span><span class="label">Marciano</span></button>
+  <button class="tool-btn tech-pack-btn" data-type="entityReptilian"       id="btn-tech-entityReptilian"      style="display:none"><span class="icon">🦎</span><span class="label">Reptiliano</span></button>
+  <button class="tool-btn" id="btn-save-cs" data-type="save" title="Salvar universo (.cosmos)"><span class="icon">💾</span><span class="label">Salvar</span><span class="kbd-hint">Ctrl+S</span></button>
+  <button class="tool-btn reset-btn" data-type="reset"><span class="icon">🗑️</span><span class="label">Reset</span><span class="kbd-hint">Del</span></button>
+</div>
+<!-- Setas de scroll da toolbar — fora da toolbar, posicionadas absolutamente -->
+<div id="tb-scroll-wrap">
+  <button id="tb-scroll-up" aria-label="Rolar para cima">▲</button>
+  <button id="tb-scroll-dn" aria-label="Rolar para baixo">▼</button>
+</div>
+<!-- Scroll hint for desktop -->
+<div id="scroll-hint">🖱 Scroll = zoom &nbsp;|&nbsp; Middle-click = pan &nbsp;|&nbsp; Hold = evento</div>
+<!-- Destruction info overlay -->
+<div id="dest-info-overlay">
+  <span class="di-icon" id="di-icon">💥</span>
+  <div class="di-name" id="di-name">—</div>
+  <div class="di-desc" id="di-desc">—</div>
+  <div class="di-rank" id="di-rank">Rank 3</div>
+  <div class="di-btns">
+    <button class="di-btn" id="di-use">⚡ Usar</button>
+    <button class="di-btn" id="di-close">✕</button>
+  </div>
+</div>
+
+<!-- Destruction toggle button (sandbox only) -->
+<button id="dest-toggle" title="Poderes de Destruição">💀</button>
+
+<!-- Destruction panel (sandbox only) -->
+<div id="dest-panel">
+  <div id="dest-panel-title">💀 DESTRUIR</div>
+  <div id="dest-btn-list"></div>
+</div>
+
+<div id="sn-modal">
+  <div class="sn-icon">💥</div>
+  <div class="sn-title">Provocar Supernova?</div>
+  <div class="sn-desc">Esta estrela irá expandir, colapsar e explodir — destruindo tudo ao redor!</div>
+  <div class="sn-btns">
+    <button class="sn-btn" id="sn-yes">✓ Sim</button>
+    <button class="sn-btn" id="sn-no">✕ Não</button>
+  </div>
+</div>
+
+<div id="pulsar-modal">
+  <div class="sn-icon">💫</div>
+  <div class="sn-title" style="color:#7be8ff;">Colapso do Pulsar?</div>
+  <div class="sn-desc">O Pulsar entrará em colapso — poderá virar uma Estrela de Nêutrons ou um Planeta de Pulsar exótico!</div>
+  <div class="sn-btns">
+    <button class="sn-btn" id="pulsar-yes" style="background:rgba(100,220,255,.14);border-color:rgba(100,220,255,.5);color:#7be8ff;">✓ Sim</button>
+    <button class="sn-btn" id="pulsar-no">✕ Não</button>
+  </div>
+</div>
+
+<div id="magnetar-modal">
+  <div class="sn-icon">⚡</div>
+  <div class="sn-title" style="color:#cc33ff;">Explosão Catastrófica?</div>
+  <div class="sn-desc">O Magnetar vai rachar, emitir feixes devastadores e atrair tudo com força extrema antes de colapsar!</div>
+  <div class="sn-btns">
+    <button class="sn-btn" id="magnetar-yes" style="background:rgba(200,50,255,.14);border-color:rgba(200,50,255,.6);color:#cc33ff;">✓ Desencadear</button>
+    <button class="sn-btn" id="magnetar-no">✕ Não</button>
+  </div>
+</div>
+<div id="bh-explode-modal">
+  <div class="sn-icon">💀</div>
+  <div class="sn-title" style="color:#ff50b0;">Explosão do Buraco Negro?</div>
+  <div class="sn-desc">O buraco negro irá colapsar, liberando feixes de raios gama devastadores que evaporarão tudo na existência. Um buraco branco nascerá das cinzas.</div>
+  <div class="sn-btns">
+    <button class="sn-btn" id="bh-explode-yes" style="background:rgba(255,50,160,.14);border-color:rgba(255,50,160,.5);color:#ff50b0;">✓ Desencadear</button>
+    <button class="sn-btn" id="bh-explode-no">✕ Cancelar</button>
+  </div>
+</div>
+
+<div id="wh-singularity-modal">
+  <div class="sn-icon">🌀</div>
+  <div class="sn-title" style="color:#7be8ff;">Singularidade do Buraco Branco?</div>
+  <div class="sn-desc">O buraco branco irá retrair em uma singularidade microscópica, menor que uma estrela de fundo, e ficará parado para sempre.</div>
+  <div class="sn-btns">
+    <button class="sn-btn" id="wh-singularity-yes" style="background:rgba(100,220,255,.14);border-color:rgba(100,220,255,.5);color:#7be8ff;">✓ Retrair</button>
+    <button class="sn-btn" id="wh-singularity-no">✕ Cancelar</button>
+  </div>
+</div>
+<div id="tooltip"></div>
+<div id="flash"></div>
+
+<!-- ══ MOD MENU ══ -->
+<!-- Ícone flutuante — aparece só após código correto -->
+<div id="modmenu-fab" title="Mod Menu">⚙️</div>
+
+<!-- Painel principal -->
+<div id="modmenu-panel">
+  <div id="modmenu-header">
+    <span id="modmenu-title">⚙️ MOD MENU <span id="modmenu-version">DEV</span></span>
+    <button id="modmenu-close">✕</button>
+  </div>
+  <div id="modmenu-body">
+
+    <!-- INVASÃO ALIEN -->
+    <div class="mm-section">
+      <div class="mm-section-title">👽 INVASÃO ALIEN</div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-danger" id="mm-start-invasion">▶ Forçar Invasão</button>
+        <button class="mm-btn mm-btn-warn"   id="mm-end-invasion">⏹ Encerrar</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn" id="mm-bypass-antiforce">🔓 Bypass Anti-Force</button>
+        <button class="mm-btn mm-btn-ok" id="mm-alien-skip-boss">⚡ Pular p/ Boss</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn" id="mm-alien-freeze-time">🕐 Travar Tempo</button>
+      </div>
+      <div class="mm-row mm-row-wrap">
+        <button class="mm-btn" id="mm-alien-boss-phase-1">1️⃣ Fase 1</button>
+        <button class="mm-btn" id="mm-alien-boss-phase-2">2️⃣ Fase 2</button>
+        <button class="mm-btn" id="mm-alien-boss-phase-3">3️⃣ Fase Final</button>
+      </div>
+      <div class="mm-info" id="mm-invasion-status">—</div>
+    </div>
+
+    <!-- INVASÃO MARCIANA -->
+    <div class="mm-section">
+      <div class="mm-section-title">⚙️ INVASÃO MARCIANA</div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-danger" id="mm-start-mars">▶ Forçar Invasão</button>
+        <button class="mm-btn mm-btn-warn"   id="mm-end-mars">⏹ Encerrar</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn" id="mm-bypass-mars">🔓 Bypass Anti-Force</button>
+        <button class="mm-btn mm-btn-ok" id="mm-mars-skip-boss">⚡ Pular p/ Boss</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn" id="mm-mars-freeze-time">🕐 Travar Tempo</button>
+      </div>
+      <div class="mm-row mm-row-wrap">
+        <button class="mm-btn" id="mm-mars-boss-phase-1">1️⃣ Fase 1</button>
+        <button class="mm-btn" id="mm-mars-boss-phase-2">2️⃣ Fase 2</button>
+        <button class="mm-btn" id="mm-mars-boss-phase-3">3️⃣ Fase Final</button>
+      </div>
+      <div class="mm-info" id="mm-mars-status">—</div>
+    </div>
+
+    <!-- INVASÃO REPTILIANA -->
+    <div class="mm-section">
+      <div class="mm-section-title">🦎 INVASÃO REPTILIANA</div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-danger" id="mm-start-rept">▶ Forçar Invasão</button>
+        <button class="mm-btn mm-btn-warn"   id="mm-end-rept">⏹ Encerrar</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-ok" id="mm-rept-skip-boss">⚡ Pular p/ Boss</button>
+        <button class="mm-btn" id="mm-bypass-rept">🔓 Bypass Anti-Force</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn" id="mm-rept-form-serpente">🐍 Solaris</button>
+        <button class="mm-btn" id="mm-rept-form-camaleao">🦎 Nebulon</button>
+        <button class="mm-btn" id="mm-rept-form-dragao">🐉 Drexcy</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-warn" id="mm-rept-form-final">💀 Quasord</button>
+      </div>
+      <div class="mm-row mm-row-wrap">
+        <button class="mm-btn" id="mm-rff-phase-1">1️⃣ Fase 1 (Minions)</button>
+        <button class="mm-btn" id="mm-rff-phase-2">2️⃣ Fase 2 (Guardiões)</button>
+        <button class="mm-btn" id="mm-rff-phase-3">3️⃣ Fase 3 (Enlouquecido)</button>
+        <button class="mm-btn" id="mm-rff-phase-4">4️⃣ Fase 4 (Despedaçado)</button>
+        <button class="mm-btn" id="mm-rff-phase-5">5️⃣ Fase 5 (Desespero)</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-warn" id="mm-rff-hitkill">💀 Hitkill (Fase 5)</button>
+      </div>
+      <div class="mm-info" id="mm-rept-status">—</div>
+    </div>
+
+    <!-- ASTROS -->
+    <div class="mm-section">
+      <div class="mm-section-title">🌌 SPAWNAR ASTRO</div>
+      <div class="mm-row mm-wrap">
+        <button class="mm-btn mm-astro" data-type="star">⭐ Estrela</button>
+        <button class="mm-btn mm-astro" data-type="planet">🪐 Planeta</button>
+        <button class="mm-btn mm-astro" data-type="blackhole">⚫ B.Negro</button>
+        <button class="mm-btn mm-astro" data-type="whitehole">⚪ B.Branco</button>
+        <button class="mm-btn mm-astro" data-type="pulsar">💠 Pulsar</button>
+        <button class="mm-btn mm-astro" data-type="magnetar">🧲 Magnetar</button>
+        <button class="mm-btn mm-astro" data-type="quasar">🌀 Quasar</button>
+        <button class="mm-btn mm-astro" data-type="blazar">🔴 Blazar</button>
+        <button class="mm-btn mm-astro" data-type="neutronstar">🔘 Nêutron</button>
+        <button class="mm-btn mm-astro" data-type="cepheid">🌟 Cefeida</button>
+        <button class="mm-btn mm-astro" data-type="wormhole">🌀 Minhoca</button>
+        <button class="mm-btn mm-astro" data-type="greatattractor">🌐 G.Atrator</button>
+      </div>
+      <div class="mm-info">Spawnado no centro da tela</div>
+      <div class="mm-row mm-wrap">
+        <button class="mm-btn" id="mm-goto-colossal">🔵📍 Ir até Núcleo Dimensional</button>
+        <button class="mm-btn mm-btn-danger" id="mm-start-eclipse">🌘 Iniciar Eclipse</button>
+      </div>
+    </div>
+
+    <!-- RAÇAS CÓSMICAS -->
+    <div class="mm-section">
+      <div class="mm-section-title">🧬 SPAWNAR RAÇA CÓSMICA</div>
+      <div class="mm-row mm-wrap">
+        <button class="mm-btn mm-cosmic-race" data-race="plasmicea">🔥 Plasmícea</button>
+        <button class="mm-btn mm-cosmic-race" data-race="fungica">🍄 Fúngica</button>
+        <button class="mm-btn mm-cosmic-race" data-race="necrida">💀 Nécrida</button>
+        <button class="mm-btn mm-cosmic-race" data-race="viscera">🩸 Víscera</button>
+        <button class="mm-btn mm-cosmic-race" data-race="robotica">🤖 Robótica</button>
+      </div>
+      <div class="mm-info">Requer Sandbox + Fase Cósmica ativos. Spawna no centro da tela</div>
+    </div>
+
+    <!-- BOSS CÓSMICO: POLVICULLUS ESTELARUS -->
+    <div class="mm-section">
+      <div class="mm-section-title">🐙 POLVICULLUS ESTELARUS</div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-danger" id="mm-start-polv">▶ Forçar Combate</button>
+        <button class="mm-btn mm-btn-warn"   id="mm-end-polv">⏹ Encerrar</button>
+      </div>
+      <div class="mm-row mm-row-wrap">
+        <button class="mm-btn" id="mm-polv-phase-2">2️⃣ Forçar Fase 2</button>
+        <button class="mm-btn" id="mm-polv-phase-3">3️⃣ Forçar Fase 3</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-warn" id="mm-polv-hitkill">💀 Hitkill (mata na hora)</button>
+      </div>
+      <div class="mm-info">Não requer relíquia/Invocador — spawna direto para testes</div>
+    </div>
+
+    <!-- BOSS CÓSMICO: GALAXIMY -->
+    <div class="mm-section">
+      <div class="mm-section-title">🌌 GALAXIMY</div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-danger" id="mm-start-galx">▶ Forçar Combate</button>
+        <button class="mm-btn mm-btn-warn"   id="mm-end-galx">⏹ Encerrar</button>
+      </div>
+      <div class="mm-row mm-row-wrap">
+        <button class="mm-btn" id="mm-galx-phase-2">2️⃣ Forçar Fase 2</button>
+        <button class="mm-btn" id="mm-galx-phase-3">3️⃣ Forçar Fase 3</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-warn" id="mm-galx-hitkill">💀 Hitkill (mata na hora)</button>
+      </div>
+      <div class="mm-info">Não requer relíquia/Invocador — spawna direto para testes</div>
+    </div>
+
+    <div class="mm-section">
+      <div class="mm-section-title">🏆 RANK &amp; LOGS</div>
+      <div class="mm-row">
+        <label class="mm-label">Rank (0–40)</label>
+        <input class="mm-input" id="mm-rank-input" type="number" min="0" max="40" value="0">
+        <button class="mm-btn mm-btn-ok" id="mm-set-rank">✓ Setar</button>
+      </div>
+      <div class="mm-row">
+        <label class="mm-label">Logs</label>
+        <input class="mm-input" id="mm-logs-input" type="number" min="0" value="0">
+        <button class="mm-btn mm-btn-ok" id="mm-set-logs">✓ Setar</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn" id="mm-rank-max">⚡ Rank MAX</button>
+        <button class="mm-btn mm-btn-warn" id="mm-rank-reset">↺ Zerar</button>
+      </div>
+    </div>
+
+    <div class="mm-section">
+      <div class="mm-section-title">⚛️ QUANTIKS</div>
+      <div class="mm-row">
+        <label class="mm-label">Definir valor</label>
+        <input class="mm-input" id="mm-quantiks-input" type="number" min="0" value="0">
+        <button class="mm-btn mm-btn-ok" id="mm-set-quantiks">✓ Setar</button>
+      </div>
+      <div class="mm-row mm-row-wrap">
+        <button class="mm-btn mm-quantiks-add" data-amount="10">+10</button>
+        <button class="mm-btn mm-quantiks-add" data-amount="50">+50</button>
+        <button class="mm-btn mm-quantiks-add" data-amount="100">+100</button>
+        <button class="mm-btn mm-quantiks-add" data-amount="500">+500</button>
+        <button class="mm-btn mm-quantiks-add" data-amount="1000">+1000</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-warn" id="mm-quantiks-reset">↺ Zerar</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-ok" id="mm-spawn-quantik-comet">🟢☄️ Spawnar Cometa de Quantiks</button>
+      </div>
+      <div class="mm-info" id="mm-quantiks-status">—</div>
+    </div>
+
+    <div class="mm-section">
+      <div class="mm-section-title">⭐ STARIS</div>
+      <div class="mm-row">
+        <label class="mm-label">Definir valor</label>
+        <input class="mm-input" id="mm-staris-input" type="number" min="0" value="0">
+        <button class="mm-btn mm-btn-ok" id="mm-set-staris">✓ Setar</button>
+      </div>
+      <div class="mm-row mm-row-wrap">
+        <button class="mm-btn mm-staris-add" data-amount="10">+10</button>
+        <button class="mm-btn mm-staris-add" data-amount="50">+50</button>
+        <button class="mm-btn mm-staris-add" data-amount="100">+100</button>
+        <button class="mm-btn mm-staris-add" data-amount="500">+500</button>
+        <button class="mm-btn mm-staris-add" data-amount="1000">+1000</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-warn" id="mm-staris-reset">↺ Zerar</button>
+      </div>
+      <div class="mm-info" id="mm-staris-status">—</div>
+    </div>
+
+    <!-- JOGO -->
+    <div class="mm-section">
+      <div class="mm-section-title">🎮 JOGO</div>
+      <div class="mm-row">
+        <button class="mm-btn" id="mm-toggle-sandbox">🔀 Toggle Sandbox</button>
+        <button class="mm-btn" id="mm-toggle-evc">✨ Toggle EVC</button>
+      </div>
+      <div class="mm-row">
+        <button class="mm-btn mm-btn-danger" id="mm-clear-all">🗑 Limpar Tudo</button>
+        <button class="mm-btn" id="mm-toggle-pause">⏸ Pausar</button>
+      </div>
+      <div class="mm-info" id="mm-game-status">—</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Tela de código (10 cliques na logo) -->
+<div id="modmenu-code-overlay">
+  <div id="modmenu-code-box">
+    <div id="modmenu-code-title">🔐 CÓDIGO DE ACESSO</div>
+    <div id="modmenu-code-sub">Digite o código de desenvolvedor</div>
+    <input id="modmenu-code-input" type="text" autocomplete="off" spellcheck="false" placeholder="_ _ _ _ _ _ _ _">
+    <div id="modmenu-code-error"></div>
+    <div class="mm-row" style="justify-content:center;gap:10px;margin-top:12px;">
+      <button id="modmenu-code-confirm">✓ Confirmar</button>
+      <button id="modmenu-code-cancel">✕ Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     MODAL DE DESBLOQUEIO DO PACOTE PLANETAS
+     ═══════════════════════════════════════════════════════════════════ -->
+<div id="pack-unlock-modal">
+  <div id="pack-unlock-box">
+    <div id="pack-unlock-img-wrap">
+      <img id="pack-unlock-img" src="images/Packs/planets.png" alt="Pacote Planetas">
+    </div>
+    <div id="pack-unlock-badge">✦ extensão desbloqueada ✦</div>
+    <div id="pack-unlock-title">🪐 Pacote Planetas</div>
+    <div id="pack-unlock-desc">
+      Uma nova coleção de <strong>10 tipos de corpos planetários</strong> foi adicionada à sua barra de astros. Cada planeta tem física, temperatura, aparência e comportamento únicos — muito além de um planeta comum.<br><br>
+      Acesse-os pela <strong>barra separada acima das ferramentas</strong>. Para desativar, vá em <strong>Configurações → Extensões e Pacotes</strong>.
+    </div>
+    <div id="pack-unlock-pills">
+      <span class="pack-pill">🟠 G. Gasoso</span>
+      <span class="pack-pill">🔵 G. Gelo</span>
+      <span class="pack-pill">🌍 Super Terra</span>
+      <span class="pack-pill">💙 Mini-Netuno</span>
+      <span class="pack-pill">⚪ P. Anão</span>
+      <span class="pack-pill">🌋 Lava</span>
+      <span class="pack-pill">🌊 Oceano</span>
+      <span class="pack-pill">🏜️ Deserto</span>
+      <span class="pack-pill">🟫 Carbono</span>
+      <span class="pack-pill">🔨 Ferro</span>
+    </div>
+    <button id="pack-unlock-btn">Explorar Planetas</button>
+  </div>
+</div>
+
+<div id="star-pack-unlock-modal">
+  <div id="star-pack-unlock-box">
+    <div class="sp-img-wrap">
+      <img src="images/Packs/stars.png" alt="Pacote Estrelas">
+    </div>
+    <div class="sp-badge">✦ extensão desbloqueada ✦</div>
+    <div class="sp-title">⭐ Pacote Estrelas</div>
+    <div class="sp-desc"><strong>20 tipos raras e teóricas foram adicionados à sua barra. Cada uma tem física, comportamento e visual únicos — de anãs a hipergigantes, de vampiras a estrelas de Planck.<br><br>Acesse-os pela <strong>barra de ferramentas</strong>. Para desativar, vá em <strong>Configurações → Extensões</strong>.</div>
+    <div class="sp-pills">
+      <span class="sp-pill">🔴 A.Vermelha</span>
+      <span class="sp-pill">🌕 A.Amarela</span>
+      <span class="sp-pill">🔷 E.Azul</span>
+      <span class="sp-pill">🟥 G.Vermelha</span>
+      <span class="sp-pill">💥 Supergigante</span>
+      <span class="sp-pill">🤍 A.Branca</span>
+      <span class="sp-pill">🌞 Hipergig.</span>
+      <span class="sp-pill">🩸 Vampira</span>
+      <span class="sp-pill">🔗 Quarks</span>
+      <span class="sp-pill">🍥 Thorne-Ż</span>
+      <span class="sp-pill">🎨 E.Ferro</span>
+      <span class="sp-pill">🪞 Estranha</span>
+      <span class="sp-pill">🔌 Eletrofraca</span>
+      <span class="sp-pill">🧵 Planck</span>
+      <span class="sp-pill">🌪️ Wolf-Rayet</span>
+      <span class="sp-pill">✨ Przybylski</span>
+      <span class="sp-pill">🎭 Janus</span>
+      <span class="sp-pill">〰️ Cordas</span>
+      <span class="sp-pill">🫧 Gravastar</span>
+      <span class="sp-pill">🌒 Quasi-Star</span>
+    </div>
+    <button id="star-pack-unlock-btn">Explorar Estrelas</button>
+  </div>
+</div>
+
+
+<div id="tech-pack-unlock-modal">
+  <div id="tech-pack-unlock-box">
+    <div class="tp-img-wrap">
+      <img src="images/Packs/tecnologic.png" alt="Pacote Tecnológico">
+    </div>
+    <div class="tp-badge">✦ extensão desbloqueada ✦</div>
+    <div class="tp-title">⚙️ Pacote Tecnológico</div>
+    <div class="tp-desc"><strong>10 megaestruturas da civilização Tipo III</strong> e <strong>10 novas construções e entidades</strong> estão agora disponíveis. Esferas que coletam energia de pulsos estelares, motores que empurram estrelas inteiras pelo mapa, armas laser cósmicas, projéteis de gravidade artificial, sondas, laboratórios, estações orbitais e telescópios.<br><br>Toque num astro após selecionar a ferramenta para <strong>ancorar a estrutura</strong>. Acesse em <strong>Configurações → Extensões e Pacotes</strong>.<br><br><strong>5 Entidades Vivas</strong> também foram liberadas — criaturas autônomas que caçam, colonizam e destroem astros indefinidamente. Invoque-as onde quiser e elas agirão por conta própria.</div>
+    <div class="tp-pills">
+      <span class="tp-pill">🌐 Esfera de Dyson</span>
+      <span class="tp-pill">🛞 Enxame de Dyson</span>
+      <span class="tp-pill">🚀 Motor Shkadov</span>
+      <span class="tp-pill">🧠 Matrioshka</span>
+      <span class="tp-pill">🛗 Elevador Espacial</span>
+      <span class="tp-pill">🌀 Alcubierre</span>
+      <span class="tp-pill">⛏️ Extrator de Massa</span>
+      <span class="tp-pill">💿 Disco de Alderson</span>
+      <span class="tp-pill">🔅 Nicoll-Dyson</span>
+      <span class="tp-pill">🧿 Proj.Gravidade</span>
+      <span class="tp-pill">🔥 Devorador de Estrelas</span>
+      <span class="tp-pill">🛸 Frota Militar</span>
+      <span class="tp-pill">🚁 Frota Marciana</span>
+      <span class="tp-pill">🔻 Frota Reptiliana</span>
+      <span class="tp-pill">🦠 Parasita Cósmico</span>
+      <span class="tp-pill">🐍 Serpente do Vácuo</span>
+      <span class="tp-pill">⚙️ Mecha-Mundo</span>
+      <span class="tp-pill">🛰️ Sonda</span>
+      <span class="tp-pill">🔬 Laboratório</span>
+      <span class="tp-pill">🏗️ Estação</span>
+      <span class="tp-pill">🔭 Telescópio</span>
+    </div>
+    <button id="tech-pack-unlock-btn">Construir o Futuro</button>
+  </div>
+</div>
+
+<div id="exotic-pack-unlock-modal">
+  <div id="exotic-pack-unlock-box">
+    <div class="ep-img-wrap">
+      <img src="images/Packs/exotic.png" alt="Pacote Exótico">
+    </div>
+    <div class="ep-badge">✦ extensão desbloqueada ✦</div>
+    <div class="ep-title">🌀 Pacote Exótico</div>
+    <div class="ep-desc"><strong>20 astros teóricos e exóticos</strong> foram adicionados à sua barra. Objetos hipotéticos e de fronteira da física — estrelas escuras, singularidades desnudas, galáxias quase invisíveis e estruturas do próprio espaço-tempo. Cada um com física, comportamento e visual únicos.<br><br>Acesse-os pela <strong>barra de ferramentas</strong>. Para desativar, vá em <strong>Configurações → Extensões e Pacotes</strong>.</div>
+    <div class="ep-pills">
+      <span class="ep-pill">🖤 E.Escura</span>
+      <span class="ep-pill">🔺 P.Vermelho</span>
+      <span class="ep-pill">👹 E.Monstro</span>
+      <span class="ep-pill">🔩 E.Ferro Ex.</span>
+      <span class="ep-pill">➰ C.Cósmica</span>
+      <span class="ep-pill">🚨 Blitzar</span>
+      <span class="ep-pill">🔦 E.Be</span>
+      <span class="ep-pill">🌗 E.N.Binárias</span>
+      <span class="ep-pill">💍 Obj.Hoag</span>
+      <span class="ep-pill">🥽 G.Escura</span>
+      <span class="ep-pill">🕯️ B.Vermelho</span>
+      <span class="ep-pill">🌈 Singularidade</span>
+      <span class="ep-pill">🌚 Blaneta</span>
+      <span class="ep-pill">🟤 Sub-anã Marrom</span>
+      <span class="ep-pill">🟦 Q-Ball</span>
+      <span class="ep-pill">♾️ Geon</span>
+      <span class="ep-pill">🧱 M.Domínio</span>
+      <span class="ep-pill">💎 Cristal E-T</span>
+      <span class="ep-pill">🎇 Kugelblitz</span>
+      <span class="ep-pill">🟣 E.Energia Escura</span>
+    </div>
+    <button id="exotic-pack-unlock-btn">Explorar o Exótico</button>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════════════════════════════
+     COSMY TUTORIAL OVERLAY
+     ═══════════════════════════════════════════════════════════════════ -->
+<div id="cosmy-overlay">
+  <!-- Fundo escurecido com buraco no alvo -->
+  <div id="cosmy-backdrop"></div>
+
+  <!-- Spotlight (circulo que ilumina o elemento alvo) -->
+  <div id="cosmy-spotlight"></div>
+
+  <!-- Seta apontando para o elemento alvo -->
+  <div id="cosmy-arrow">▼</div>
+
+  <!-- Balão de fala do Cosmy -->
+  <div id="cosmy-bubble">
+    <div id="cosmy-bubble-inner">
+      <!-- Personagem Cosmy -->
+      <img id="cosmy-img" src="images/Cosmy/normal.png" alt="Cosmy">
+
+      <!-- Texto do passo -->
+      <div id="cosmy-text-wrap">
+        <div id="cosmy-step-label">PASSO 1</div>
+        <div id="cosmy-msg">Olá, explorador!</div>
+      </div>
+    </div>
+
+    <!-- Barra de progresso dos passos -->
+    <div id="cosmy-progress-bar">
+      <div id="cosmy-progress-fill"></div>
+    </div>
+
+    <!-- Botões de navegação -->
+    <div id="cosmy-btns">
+      <button id="cosmy-skip">Pular Tutorial</button>
+      <button id="cosmy-next">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Balão de fala do QUASORD — dispara quando o Drexcy (última forma do Trio
+     de Guardiões) é derrotado, revelando que "Aniquilador de Galáxias" é
+     apenas o apelido que as raças fracas usam; mesmo padrão visual do
+     cosmy-overlay/cosmy-bubble, paleta vermelha, fundo preto próprio. -->
+<div id="quasord-overlay">
+  <div id="quasord-backdrop"></div>
+  <div id="quasord-bubble">
+    <div id="quasord-bubble-inner">
+      <div id="quasord-text-wrap">
+        <div id="quasord-step-label">???</div>
+        <div id="quasord-msg"></div>
+      </div>
+    </div>
+    <div id="quasord-btns">
+      <button id="quasord-next">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE CONQUISTAS -->
+<div id="ach-modal">
+  <div id="ach-box">
+    <div id="ach-header">
+      <div id="ach-title">🏆 Conquistas</div>
+      <div id="ach-progress-lbl" style="font-size:10px;color:rgba(255,214,0,.5);">0 / 24</div>
+      <button id="ach-close">✕</button>
+    </div>
+    <div id="ach-progress-bar"><div id="ach-progress-fill" style="width:0%"></div></div>
+    <div id="ach-tabs">
+      <button class="ach-tab active-easy" data-level="easy">🌱 Fácil</button>
+      <button class="ach-tab" data-level="medium">⚡ Médio</button>
+      <button class="ach-tab" data-level="hard">💀 Difícil</button>
+      <button class="ach-tab" data-level="boss">🐙 Bosses</button>
+    </div>
+    <div id="ach-list"><!-- gerado por JS --></div>
+    <div id="ach-boss-list" style="display:none"><!-- gerado por JS --></div>
+  </div>
+</div>
+
+<!-- TOAST DE CONQUISTA -->
+<div id="ach-toast">
+  <img id="ach-toast-char" src="images/Cosmy/normal.png" alt="">
+  <div id="ach-toast-info">
+    <div id="ach-toast-label">🏆 Conquista Desbloqueada!</div>
+    <div id="ach-toast-name">—</div>
+  </div>
+</div>
+
+<!-- MODAL DA MOCHILA -->
+<div id="bp-modal">
+  <div id="bp-box">
+    <div id="bp-header">
+      <div id="bp-title">🎒 Mochila</div>
+      <button id="bp-close">✕</button>
+    </div>
+    <div id="bp-tabs">
+      <button class="bp-tab active" data-pane="items">🎒 Itens</button>
+      <button class="bp-tab" data-pane="cosmonario">📖 Cosmonário</button>
+      <button class="bp-tab" data-pane="quantiks">⚛️ Quantiks</button>
+      <button class="bp-tab" data-pane="staris">⭐ Staris</button>
+      <button class="bp-tab" data-pane="links">🏆 Conquistas/Config</button>
+      <button class="bp-tab" data-pane="info">📊 Informações</button>
+    </div>
+    <div id="bp-panes">
+      <div class="bp-pane active" id="bp-pane-items">
+        <div id="bp-items-list"></div>
+        <div id="bp-empty-msg" style="display:none">Sua mochila está vazia.<br>Itens guardados aparecerão aqui.</div>
+      </div>
+      <div class="bp-pane" id="bp-pane-cosmonario">
+        <div id="cosmonario-progress">Descobertos: <span id="cosmonario-count">0</span> / <span id="cosmonario-total">0</span></div>
+        <div id="cosmonario-list"></div>
+      </div>
+      <div class="bp-pane" id="bp-pane-quantiks">
+        <div id="bp-quantiks-card">
+          <img src="images/CosmicPhase/Quantik.svg" alt="Quantik" id="bp-quantiks-icon">
+          <div id="bp-quantiks-amount">0</div>
+          <div id="bp-quantiks-label">Quantiks</div>
+          <div id="bp-quantiks-desc">
+            Astros criados por você geram Quantiks automaticamente após permanecerem
+            vivos por tempo suficiente no universo. Astros destruídos antes disso não geram nada.
+          </div>
+        </div>
+        <div id="bp-quantik-skins-title" style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);margin:16px 0 8px;">🎨 Skins Cósmicas</div>
+        <div id="bp-quantik-skins-list"></div>
+      </div>
+      <div class="bp-pane" id="bp-pane-staris">
+        <div id="bp-staris-card">
+          <img src="images/CosmicPhase/Staris.svg" alt="Staris" id="bp-staris-icon">
+          <div id="bp-staris-amount">0</div>
+          <div id="bp-staris-label">Staris</div>
+          <div id="bp-staris-desc">
+            Ganhos ao coletar moléculas e poeira cósmica no Microscópio Quântico.
+            Quanto mais rara a molécula, mais Staris ela rende.
+          </div>
+        </div>
+        <div id="bp-telescope-card">
+          <div id="bp-telescope-label">🔬 Upgrades da Visão Profunda</div>
+          <div id="bp-telescope-desc">
+            Dê duplo toque numa molécula do Microscópio para observá-la por dentro:
+            átomos, depois quarks, préons e cordas. Use Staris para desbloquear
+            profundidade e melhorar tempo de coleta, zoom e alcance.
+          </div>
+        </div>
+        <div id="bp-telescope-depth-list"></div>
+        <div id="bp-telescope-attr-list"></div>
+        <div id="bp-telescope-prestige"></div>
+      </div>
+      <div class="bp-pane" id="bp-pane-links">
+        <div id="bp-quicklinks">
+          <div class="bp-quicklink" id="bp-link-achievements">
+            <div class="bp-quicklink-icon">🏆</div>
+            <div>
+              <div class="bp-quicklink-label">Conquistas</div>
+              <div class="bp-quicklink-sub">Veja seu progresso nas 24 conquistas</div>
+            </div>
+          </div>
+          <div class="bp-quicklink" id="bp-link-settings">
+            <div class="bp-quicklink-icon">⚙️</div>
+            <div>
+              <div class="bp-quicklink-label">Configurações</div>
+              <div class="bp-quicklink-sub">Áudio, gráficos e mais</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bp-pane" id="bp-pane-info">
+        <div id="bp-info-card">
+          <div id="bp-info-rank">—</div>
+          <div id="bp-info-lvl">Nível — · Rank —</div>
+          <div id="bp-info-xpbar"><div id="bp-info-xpfill" style="width:0%"></div></div>
+          <div id="bp-info-xplbl"><span id="bp-info-xpcur">0</span> / <span id="bp-info-xpnext">0</span> XP</div>
+          <div id="bp-info-stats">
+            <div class="bp-stat-box"><div class="bp-stat-val" id="bp-stat-galaxies">0</div><div class="bp-stat-lbl">Galáxias</div></div>
+            <div class="bp-stat-box"><div class="bp-stat-val" id="bp-stat-astros">0</div><div class="bp-stat-lbl">Astros Desbl.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
