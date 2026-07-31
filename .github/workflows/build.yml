@@ -1,4 +1,4 @@
-name: Build Android APK
+ame: Build Android APK
 
 on:
   push:
@@ -43,9 +43,17 @@ jobs:
           cd android
           ./gradlew assembleRelease --no-daemon
 
+      - name: Align and Sign Release APK
+        run: |
+          BUILD_TOOLS=$ANDROID_HOME/build-tools/34.0.0
+          APK_PATH=android/app/build/outputs/apk/release
+          $BUILD_TOOLS/zipalign -v -p 4 $APK_PATH/app-release-unsigned.apk $APK_PATH/CosmosSim-aligned.apk
+          keytool -genkey -v -keystore test.keystore -alias test -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=CosmosSim"
+          $BUILD_TOOLS/apksigner sign --ks test.keystore --ks-pass pass:123456 --out $APK_PATH/CosmosSim-Signed.apk $APK_PATH/CosmosSim-aligned.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: CosmosSim-Release-APK
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: android/app/build/outputs/apk/release/CosmosSim-Signed.apk
 
