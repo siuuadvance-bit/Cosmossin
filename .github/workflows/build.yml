@@ -28,6 +28,11 @@ jobs:
       - name: Install Dependencies
         run: npm install --legacy-peer-deps || true
 
+      - name: Generate Capacitor Assets (Icon & Splash)
+        run: |
+          npm install @capacitor/assets --save-dev
+          npx @capacitor/assets generate --android --icon image.png --splash splash.png
+
       - name: Copy Web Assets to Android
         run: npx cap copy android
 
