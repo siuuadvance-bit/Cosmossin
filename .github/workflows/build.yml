@@ -31,7 +31,7 @@ jobs:
       - name: Generate Capacitor Assets (Icon & Splash)
         run: |
           npm install @capacitor/assets --save-dev
-          npx @capacitor/assets generate --android --icon image.png --splash splash.png
+          npx @capacitor/assets generate --android
 
       - name: Copy Web Assets to Android
         run: npx cap copy android
