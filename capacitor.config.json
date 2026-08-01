@@ -4,8 +4,7 @@
   "webDir": "www",
   "plugins": {
     "StatusBar": {
-      "overlaysWebView": true,
-      "style": "DARK"
+      "overlaysWebView": true
     },
     "SplashScreen": {
       "launchShowDuration": 3000,
