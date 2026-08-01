@@ -28,17 +28,18 @@ jobs:
       - name: Install Dependencies
         run: npm install --legacy-peer-deps || true
 
-      # Gerador com a flag -y para não travar o terminal
+      - name: Copy Web Assets to Android
+        run: npx cap copy android
+
+      # 1. Primeiro sincroniza o código web
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      # 2. DEPOIS gera os ícones por cima (com a flag -y)
       - name: Generate Capacitor Assets (Icon & Splash)
         run: |
           npm install @capacitor/assets --save-dev
           npx -y @capacitor/assets generate --android
-
-      - name: Copy Web Assets to Android
-        run: npx cap copy android
-
-      - name: Sync Capacitor
-        run: npx cap sync android
 
       - name: Remove Termux AAPT2 override from properties
         run: |
