@@ -1,6 +1,9 @@
 package com.cosmossin.app;
 
 import android.os.Bundle;
+import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -11,10 +14,22 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Força o Android a esconder a barra superior E a barra de botões inferior
+        // Desativa qualquer reserva de espaço do sistema
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        
+        // Bloqueio via API moderna
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
         controller.hide(WindowInsetsCompat.Type.systemBars());
         controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            // Re-força o bloqueio caso o usuário toque na tela ou saia e volte pro app
+            WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+            controller.hide(WindowInsetsCompat.Type.systemBars());
+        }
     }
 }
