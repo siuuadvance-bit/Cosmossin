@@ -28,11 +28,11 @@ jobs:
       - name: Install Dependencies
         run: npm install --legacy-peer-deps || true
 
-      - name: Build Web App
-        run: npm run build || true
+      - name: Copy Web Assets to Android
+        run: npx cap copy android
 
       - name: Sync Capacitor
-        run: npx cap sync android || true
+        run: npx cap sync android
 
       - name: Remove Termux AAPT2 override from properties
         run: |
