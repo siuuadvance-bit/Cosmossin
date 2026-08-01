@@ -1,3 +1,19 @@
+/* ── MODO IMERSIVO TOTAL E TELA CHEIA ── */
+html, body {
+  width: 100%;
+  height: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed; /* Trava a WebView no topo absoluto da tela */
+  inset: 0;
+  background-color: #03040a; /* Fundo idêntico à sua variável --bg */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#03040a;--toolbar-h:58px;--zoom-h:36px;
