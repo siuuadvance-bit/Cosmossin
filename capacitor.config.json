@@ -1,5 +1,19 @@
 {
-  "appId": "com.cosmossim.app",
-  "appName": "Cosmos Sim!",
-  "webDir": "www"
+  "appId": "com.cosmossin.app",
+  "appName": "CosmosSim",
+  "webDir": "www",
+  "plugins": {
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "DARK",
+      "backgroundColor": "#000000"
+    },
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#000000",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    }
+  }
 }
