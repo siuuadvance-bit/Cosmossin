@@ -2769,4 +2769,11 @@ body.desktop-mode #btn-quit{font-size:11px;padding:8px 18px;}
   justify-content: center !important;
   box-sizing: border-box !important;
 }
+/* ── ESCALA PROPORCIONAL (Mantém o design original sem quebrar) ── */
+@media (max-height: 720px) {
+  #app {
+    transform: scale(0.92);
+    transform-origin: center top;
+  }
+}
 
