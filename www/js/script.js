@@ -812,56 +812,65 @@ document.getElementById('exp-back').addEventListener('click',()=>{
 //  EXPLORATION MODE — setup and rank gate
 // ═══════════════════════════════════════════════════════════════════
 (function setupExploreCard(){
-  const EXPLORE_RANK=25;
-  const card=document.getElementById('btn-mode-explore');
-  const desc=document.getElementById('explore-mode-desc');
+  const EXPLORE_RANK = 25;
+  const card = document.getElementById('btn-mode-explore');
+  const desc = document.getElementById('explore-mode-desc');
+
+  if (!card) return;
 
   function refreshExploreCard(){
-    const unlocked=playerRank>=EXPLORE_RANK;
-    card.classList.toggle('locked-mode',!unlocked);
-    // Remove old lock tag if any
-    const old=card.querySelector('.explore-lock-tag');
-    if(old)old.remove();
-    if(!unlocked){
-      const tag=document.createElement('div');
-      tag.className='explore-lock-tag';
-      tag.textContent='🔒 Rank '+EXPLORE_RANK;
+    const currentRank = typeof playerRank !== 'undefined' ? playerRank : 1;
+    const unlocked = currentRank >= EXPLORE_RANK;
+
+    card.classList.toggle('locked-mode', !unlocked);
+
+    // Remove trava antiga se existir
+    const old = card.querySelector('.explore-lock-tag');
+    if (old) old.remove();
+
+    if (!unlocked) {
+      const tag = document.createElement('div');
+      tag.className = 'explore-lock-tag';
+      tag.textContent = '🔒 Rank ' + EXPLORE_RANK;
       card.appendChild(tag);
-      desc.textContent='Desbloqueie no Rank '+EXPLORE_RANK+' do Modo Sandbox para viajar pelo universo em 3D simulado.';
+      if (desc) desc.textContent = 'Desbloqueie no Rank ' + EXPLORE_RANK + ' do Modo Sandbox para viajar pelo universo em 3D simulado.';
     } else {
-      desc.textContent='Viaje pelo universo em 3D simulado. Explore planetas, estrelas e astros raros. Descubra mundos e registre o cosmos.';
+      if (desc) desc.textContent = 'Viaje pelo universo em 3D simulado. Explore planetas, estrelas e astros raros.';
     }
   }
+
   refreshExploreCard();
 
-  card.addEventListener('click',()=>{
-    if(playerRank<EXPLORE_RANK){
-      // Flash the lock tag
-      const tag=card.querySelector('.explore-lock-tag');
-      if(tag){tag.style.background='rgba(255,212,59,.3)';setTimeout(()=>tag.style.background='rgba(255,212,59,.12)',400);}
-      return;
+  card.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const currentRank = typeof playerRank !== 'undefined' ? playerRank : 1;
+
+    if (currentRank < EXPLORE_RANK) {
+      // Faz piscar a tag de bloqueio amarela
+      const tag = card.querySelector('.explore-lock-tag');
+      if (tag) {
+        tag.style.background = 'rgba(255, 212, 59, .5)';
+        setTimeout(() => tag.style.background = 'rgba(255, 212, 59, .12)', 400);
+      }
+      return; // ⛔ PARAR AQUI e não entrar no modo
     }
-    startExploreMode();
+
+    if (typeof startExploreMode === 'function') {
+      startExploreMode();
+    }
   });
 
-  // Refresh whenever mode-screen is shown
-  const _origShowScreen=showScreen;
-  // Patch showScreen to refresh card
-  const _patchedShow=window.showScreen=function(id){
-    _origShowScreen(id);
-    if(id==='mode-screen')refreshExploreCard();
-  };
+  // Atualiza sempre que a tela de seleção de modos for exibida
+  if (typeof showScreen === 'function') {
+    const _origShowScreen = showScreen;
+    window.showScreen = function(id){
+      _origShowScreen(id);
+      if (id === 'mode-screen') refreshExploreCard();
+    };
+  }
 })();
-
-// Settings screen
-document.getElementById('btn-settings').addEventListener('click',()=>showScreen('settings-screen'));
-document.getElementById('settings-back').addEventListener('click',()=>showScreen('main-screen'));
-
-// Exit button (only works in electron/webview; in browser just goes to about:blank gracefully)
-document.getElementById('btn-quit').addEventListener('click',()=>{
-  if(window.close){try{window.close();}catch(e){}}
-  window.location.href='about:blank';
-});
 
 // ── Menu card mini-animations ─────────────────────────────────────
 (function initMenuCards(){
