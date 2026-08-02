@@ -2756,50 +2756,17 @@ body.desktop-mode #btn-quit{font-size:11px;padding:8px 18px;}
         animation:escama-eye-blink 3.5s ease-in-out infinite;}
       #escama-eye::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
         width:8px;height:16px;background:rgba(255,20,20,.9);border-radius:50%;box-shadow:0 0 6px rgba(0,220,255,.6);}
-/* ── RESTAURAÇÃO DOS CARDS DE MODO (Layout idêntico ao original) ── */
-#select-mode-modal {
+/* ── CARDS MAIS FINOS E COMPACTOS ── */
+.mode-card, [class*="card-modo"], .select-mode-card {
+  width: 88% !important;
+  max-width: 320px !important; /* Mais estreito horizontalmente */
+  min-height: 110px !important; /* Esticado verticalmente */
+  border-radius: 22px !important; /* Cantos bem arredondados */
+  padding: 14px 18px !important;
+  margin: 4px 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;
   justify-content: center !important;
-  gap: 12px !important; /* Espaço ideal entre os cards */
-  padding: 16px !important;
-  overflow-y: auto !important;
-}
-
-/* Restaura o formato original de cada card */
-.mode-card, [class*="card-modo"], .select-mode-card {
-  width: 100% !important;
-  max-width: 380px !important;
-  border-radius: 20px !important; /* Cantos bem arredondados originais */
-  padding: 16px 20px !important;
-  background: rgba(15, 23, 42, 0.6) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-sizing: border-box !important;
-}
-
-/* Cores das bordas originais */
-.mode-card:nth-child(1) { border-color: rgba(56, 189, 248, 0.3) !important; } /* Normal */
-.mode-card:nth-child(2) { border-color: rgba(244, 114, 182, 0.3) !important; } /* Sandbox */
-.mode-card:nth-child(3) { border-color: rgba(52, 211, 153, 0.3) !important; }  /* Exploração */
-
-/* Ajuste fino dos textos para não estourar a tela */
-.mode-card h2, .mode-card h3 {
-  font-size: 1.15rem !important;
-  margin-bottom: 6px !important;
-}
-
-.mode-card p {
-  font-size: 0.85rem !important;
-  line-height: 1.35 !important;
-  opacity: 0.85 !important;
-}
-
-/* Botão de voltar */
-.back-btn, #select-mode-modal .back-btn {
-  margin-top: 6px !important;
-  opacity: 0.7 !important;
 }
 
