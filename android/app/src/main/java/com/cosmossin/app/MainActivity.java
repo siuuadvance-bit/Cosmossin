@@ -17,15 +17,19 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         
         Window window = getWindow();
-        
-        // Torna as barras transparentes para o layout do app avançar até a borda
+
+        // 1. Permite que o app ocupe a tela inteira, inclusive a área da barra inferior
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+
+        // 2. Deixa as barras do sistema transparentes para não criarem fundo preto
         window.setStatusBarColor(Color.TRANSPARENT);
         window.setNavigationBarColor(Color.TRANSPARENT);
 
-        // Desativa encaixe do sistema
-        WindowCompat.setDecorFitsSystemWindows(window, false);
-        
-        // Oculta forçadamente Status Bar + Navigation Bar (3 botões/gestos)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarContrastEnforced(false);
+        }
+
+        // 3. Oculta explicitamente Status Bar E Navigation Bar
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(window, window.getDecorView());
         controller.hide(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
         controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
